@@ -339,17 +339,18 @@ export const HeroCampaign: React.FC<HeroCampaignProps> = ({
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '6px',
-                            background: 'linear-gradient(135deg, #B91C1C 0%, #DC2626 100%)',
+                            background: 'rgba(106, 27, 41, 0.92)',
+                            backdropFilter: 'blur(6px)',
                             color: '#FFFFFF',
-                            border: '1.5px solid var(--color-gold-bright)',
+                            border: '1px solid var(--color-gold)',
                             borderRadius: '999px',
-                            padding: '5px 12px',
-                            boxShadow: '0 4px 15px rgba(220, 38, 38, 0.5), 0 0 10px rgba(212, 175, 55, 0.4)'
+                            padding: '4px 10px',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.25)'
                           }}
                         >
-                          <Sparkles size={13} color="var(--color-gold-bright)" />
-                          <span style={{ fontSize: '0.74rem', fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                            {activeCampaign?.name ? `${activeCampaign.name} (${discountPercentage}% OFF)` : `Festive Offer • ${discountPercentage}% OFF`}
+                          <Sparkles size={12} color="var(--color-gold-bright)" />
+                          <span style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.02em' }}>
+                            {activeCampaign?.name ? `${activeCampaign.name} • ${discountPercentage}% OFF` : `Festive Offer • ${discountPercentage}% OFF`}
                           </span>
                         </div>
                       ) : (
@@ -568,16 +569,15 @@ export const HeroCampaign: React.FC<HeroCampaignProps> = ({
             )}
           </div>
 
-          {/* Interactive Category Selector Pills Below Slider */}
+          {/* Elegant Carousel Pagination Dots */}
           {slides.length > 1 && (
             <div
               style={{
                 display: 'flex',
-                gap: '6px',
+                gap: '8px',
                 justifyContent: 'center',
-                marginTop: '14px',
-                flexWrap: 'wrap',
-                maxWidth: '430px'
+                alignItems: 'center',
+                marginTop: '16px'
               }}
             >
               {slides.map((s, idx) => {
@@ -587,25 +587,26 @@ export const HeroCampaign: React.FC<HeroCampaignProps> = ({
                     key={s.slug}
                     type="button"
                     onClick={() => setActiveIdx(idx)}
+                    title={`${s.name} (${idx + 1} of ${slides.length})`}
+                    aria-label={`Go to ${s.name}`}
                     style={{
-                      padding: '5px 10px',
+                      width: isActive ? '28px' : '9px',
+                      height: '9px',
                       borderRadius: '999px',
-                      fontSize: '0.74rem',
-                      fontWeight: 700,
+                      border: isActive ? '1px solid var(--color-gold-bright)' : 'none',
+                      backgroundColor: isActive ? 'var(--color-gold-bright)' : 'rgba(255, 255, 255, 0.35)',
                       cursor: 'pointer',
-                      border: isActive ? '1.5px solid var(--color-gold-bright)' : '1px solid rgba(212, 175, 55, 0.25)',
-                      backgroundColor: isActive ? 'var(--color-gold)' : 'rgba(10, 40, 37, 0.65)',
-                      color: isActive ? 'var(--color-emerald-dark)' : '#E2E8F0',
-                      boxShadow: isActive ? '0 2px 10px rgba(212, 175, 55, 0.35)' : 'none',
-                      transition: 'all 0.2s',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '5px'
+                      transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+                      boxShadow: isActive ? '0 0 10px rgba(212, 175, 55, 0.7)' : 'none',
+                      padding: 0
                     }}
-                  >
-                    <span>{s.icon}</span>
-                    <span>{s.name}</span>
-                  </button>
+                    onMouseEnter={e => {
+                      if (!isActive) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.75)';
+                    }}
+                    onMouseLeave={e => {
+                      if (!isActive) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.35)';
+                    }}
+                  />
                 );
               })}
             </div>
