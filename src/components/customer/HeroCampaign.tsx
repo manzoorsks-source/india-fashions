@@ -1,19 +1,23 @@
 import React from 'react';
 import { Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
-import { SaleCampaign } from '../../../shared/types.js';
+import { SaleCampaign, Product } from '../../../shared/types.js';
 
 interface HeroCampaignProps {
   onExploreClick: () => void;
   activeCampaign?: SaleCampaign | null;
   activeCampaigns?: SaleCampaign[];
   onSelectCampaign?: (campaign: SaleCampaign) => void;
+  heroProduct?: Product | null;
+  onSelectProduct?: (product: Product) => void;
 }
 
 export const HeroCampaign: React.FC<HeroCampaignProps> = ({
   onExploreClick,
   activeCampaign,
   activeCampaigns = [],
-  onSelectCampaign
+  onSelectCampaign,
+  heroProduct,
+  onSelectProduct
 }) => {
   const isOfferActive = Boolean(activeCampaign && activeCampaign.is_active) || activeCampaigns.length > 0;
 
@@ -195,6 +199,7 @@ export const HeroCampaign: React.FC<HeroCampaignProps> = ({
         {/* Right Visual Moodboard / Hero Showcase */}
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <div
+            onClick={() => heroProduct && onSelectProduct?.(heroProduct)}
             style={{
               position: 'relative',
               width: '100%',
@@ -203,12 +208,20 @@ export const HeroCampaign: React.FC<HeroCampaignProps> = ({
               border: '2px solid var(--color-gold)',
               boxShadow: 'var(--shadow-gold)',
               overflow: 'hidden',
-              backgroundColor: 'var(--color-emerald-dark)'
+              backgroundColor: 'var(--color-emerald-dark)',
+              cursor: heroProduct ? 'pointer' : 'default',
+              transition: 'transform 0.3s ease'
             }}
+            onMouseEnter={e => { if (heroProduct) e.currentTarget.style.transform = 'scale(1.02)'; }}
+            onMouseLeave={e => { if (heroProduct) e.currentTarget.style.transform = 'scale(1.0)'; }}
           >
             <img
-              src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80"
-              alt="Handwoven Kanjeevaram pure silk saree with antique gold zari"
+              src={
+                heroProduct?.media?.find(m => m.is_primary)?.file_path ||
+                heroProduct?.media?.[0]?.file_path ||
+                'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80'
+              }
+              alt={heroProduct?.name || 'Featured Masterpiece'}
               style={{ width: '100%', height: '420px', objectFit: 'cover', display: 'block' }}
             />
             <div
@@ -221,12 +234,21 @@ export const HeroCampaign: React.FC<HeroCampaignProps> = ({
                 color: '#ffffff'
               }}
             >
-              <span className="badge-festive" style={{ marginBottom: '6px' }}>Featured Masterpiece</span>
-              <h3 style={{ fontSize: '1.15rem', color: '#ffffff', fontFamily: 'var(--font-serif-brand)' }}>
-                Kanjeevaram Pure Mulberry Silk
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <span className="badge-festive">
+                  {heroProduct?.campaign_label || 'Featured Masterpiece'}
+                </span>
+                {heroProduct?.category_name && (
+                  <span style={{ fontSize: '0.72rem', color: 'var(--color-gold-bright)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    {heroProduct.category_name}
+                  </span>
+                )}
+              </div>
+              <h3 style={{ fontSize: '1.2rem', color: '#ffffff', fontFamily: 'var(--font-serif-brand)', marginBottom: '4px' }}>
+                {heroProduct?.name || 'Kanjeevaram Pure Mulberry Silk'}
               </h3>
-              <p style={{ fontSize: '0.82rem', color: 'var(--color-gold-light)' }}>
-                Emerald Green & Ruby Zari Pallu
+              <p style={{ fontSize: '0.82rem', color: 'var(--color-gold-light)', margin: 0 }}>
+                {heroProduct?.fabric || 'Emerald Green & Ruby Zari Pallu'}
               </p>
             </div>
           </div>

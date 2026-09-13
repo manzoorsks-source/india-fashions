@@ -188,6 +188,10 @@ export const HomePage: React.FC<HomePageProps> = ({
     desc: 'Explore our curated Indian ethnic boutique collection.'
   };
 
+  const heroProduct = products.find(p => p.homepage_placement === 'HERO')
+    || products.find(p => p.is_featured)
+    || products[0];
+
   return (
     <div style={{ backgroundColor: '#bce1f0', minHeight: '100vh', transition: 'background-color 0.3s ease' }}>
       {/* Hero Campaign Section with Multiple Active Campaign Badges */}
@@ -196,6 +200,8 @@ export const HomePage: React.FC<HomePageProps> = ({
         activeCampaign={activeCampaign}
         activeCampaigns={activeCampaigns}
         onSelectCampaign={setActiveCampaign}
+        heroProduct={heroProduct}
+        onSelectProduct={onSelectProduct}
       />
 
       {/* Shop By Category Visual Cards Section */}
