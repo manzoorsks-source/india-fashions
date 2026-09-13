@@ -60,6 +60,17 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'healthy', brand: 'India Fashions', timestamp: new Date().toISOString() });
 });
 
+// Serve frontend production bundle
+const distDir = path.resolve(__dirname, '../dist');
+app.use(express.static(distDir));
+
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+    return next();
+  }
+  res.sendFile(path.join(distDir, 'index.html'));
+});
+
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Unhandled server error:', err);
