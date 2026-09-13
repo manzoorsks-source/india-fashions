@@ -380,7 +380,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       )}
 
       <style>{`
-        @media (max-width: 900px) {
+        @media (max-width: 960px) {
           .desktop-nav { display: none !important; }
           .mobile-menu-btn { display: block !important; }
         }

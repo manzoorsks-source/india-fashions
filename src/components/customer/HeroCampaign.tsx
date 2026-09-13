@@ -87,22 +87,11 @@ export const HeroCampaign: React.FC<HeroCampaignProps> = ({
         }}
       />
 
-      <div
-        className="container"
-        style={{
-          position: 'relative',
-          zIndex: 10,
-          padding: '50px 20px',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-          alignItems: 'center',
-          gap: '40px'
-        }}
-      >
+      <div className="container hero-container">
         {/* Left Headline & Campaign Copy */}
-        <div style={{ maxWidth: '580px' }}>
+        <div className="hero-left-content" style={{ minWidth: 0, maxWidth: '580px', width: '100%' }}>
           {activeCampaigns && activeCampaigns.length > 1 ? (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '20px' }}>
+            <div className="hero-campaign-pills" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '20px' }}>
               {activeCampaigns.map(camp => {
                 const isSelected = activeCampaign?.id === camp.id;
                 return (
@@ -189,7 +178,7 @@ export const HeroCampaign: React.FC<HeroCampaignProps> = ({
             Embrace timeless grandeur with handpicked Kanjivaram pure mulberry silks, luminous Chanderi tissue, and bespoke Banarasi Kadwa brocades. Handwoven by master looms for cherished celebrations.
           </p>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', alignItems: 'center' }}>
+          <div className="hero-btn-group" style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', alignItems: 'center' }}>
             <button
               onClick={onExploreClick}
               className="btn-gold"
@@ -226,7 +215,7 @@ export const HeroCampaign: React.FC<HeroCampaignProps> = ({
             )}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '32px', fontSize: '0.8rem', color: '#D1E5EB' }}>
+          <div className="hero-trust-badges" style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '32px', fontSize: '0.8rem', color: '#D1E5EB', flexWrap: 'wrap' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <ShieldCheck size={16} color="var(--color-gold)" />
               100% Genuine Handlooms
@@ -240,12 +229,14 @@ export const HeroCampaign: React.FC<HeroCampaignProps> = ({
 
         {/* Right Visual Category Showcase Slider (Right to Left Scrolling) */}
         <div
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}
+          className="hero-slider-wrap"
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', minWidth: 0 }}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
           {/* Main Carousel Frame */}
           <div
+            className="hero-slider-frame"
             style={{
               position: 'relative',
               width: '100%',
@@ -613,6 +604,82 @@ export const HeroCampaign: React.FC<HeroCampaignProps> = ({
           )}
         </div>
       </div>
+
+      <style>{`
+        .hero-container {
+          display: grid;
+          grid-template-columns: 1.15fr 0.85fr;
+          align-items: center;
+          gap: 40px;
+          position: relative;
+          z-index: 10;
+          padding: 50px 20px;
+          width: 100%;
+          max-width: 1280px;
+          margin: 0 auto;
+        }
+        .hero-slider-frame {
+          width: 100%;
+          max-width: 430px;
+          height: 460px;
+        }
+        @media (max-width: 960px) {
+          .hero-container {
+            grid-template-columns: 1fr !important;
+            gap: 36px !important;
+            padding: 28px 16px 36px !important;
+          }
+          .hero-left-content {
+            max-width: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
+          }
+          .hero-left-content h2 {
+            font-size: 2.1rem !important;
+          }
+          .hero-left-content p {
+            font-size: 0.95rem !important;
+            margin-bottom: 22px !important;
+          }
+          .hero-campaign-pills {
+            justify-content: center !important;
+          }
+          .hero-btn-group {
+            justify-content: center !important;
+            width: 100% !important;
+          }
+          .hero-btn-group button, .hero-btn-group a {
+            width: 100% !important;
+            max-width: 320px !important;
+            text-align: center !important;
+            justify-content: center !important;
+          }
+          .hero-trust-badges {
+            justify-content: center !important;
+            margin-top: 22px !important;
+          }
+          .hero-slider-wrap {
+            width: 100% !important;
+            max-width: 380px !important;
+            margin: 0 auto !important;
+          }
+          .hero-slider-frame {
+            height: 400px !important;
+            max-width: 100% !important;
+            border-radius: 14px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .hero-slider-frame {
+            height: 370px !important;
+          }
+          .hero-left-content h2 {
+            font-size: 1.85rem !important;
+          }
+        }
+      `}</style>
     </section>
   );
 };
