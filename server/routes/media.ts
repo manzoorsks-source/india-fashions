@@ -45,16 +45,23 @@ router.get('/product/:productId', (req: AuthenticatedRequest, res: Response) => 
   res.json({ media });
 });
 
-// Upload media files for product
+// Upload media files (supports standalone upload or product-linked upload)
 router.post('/upload', requireRole(['SUPER_ADMIN', 'ADMIN']), upload.array('photos', 10), (req: AuthenticatedRequest, res: Response) => {
   const files = req.files as Express.Multer.File[];
-  const { product_id, alt_text } = req.body;
+  const { product_id, alt_text, is_primary } = req.body;
 
-  if (!product_id) {
-    return res.status(400).json({ error: 'Product ID is required' });
-  }
   if (!files || files.length === 0) {
     return res.status(400).json({ error: 'At least one photo file is required' });
+  }
+
+  // Standalone upload (e.g. from Product Modal or Inventory Modal before product ID exists)
+  if (!product_id) {
+    const filePaths = files.map(f => `/uploads/${f.filename}`);
+    return res.status(201).json({
+      success: true,
+      file_path: filePaths[0],
+      file_paths: filePaths
+    });
   }
 
   const existingCount = queryOne<{ count: number }>(
@@ -62,27 +69,33 @@ router.post('/upload', requireRole(['SUPER_ADMIN', 'ADMIN']), upload.array('phot
     [product_id]
   )?.count || 0;
 
+  const makePrimaryRequested = is_primary === 'true' || is_primary === true || is_primary === 1 || is_primary === '1';
+
   const inserted: ProductMedia[] = [];
 
   transaction(() => {
+    if (makePrimaryRequested) {
+      run('UPDATE product_media SET is_primary = 0 WHERE product_id = ?', [product_id]);
+    }
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const mediaId = 'med-' + Date.now().toString(36) + '-' + i;
       const filePath = `/uploads/${file.filename}`;
       const sortOrder = existingCount + i + 1;
-      const isPrimary = (existingCount === 0 && i === 0) ? 1 : 0;
+      const isPrimary = makePrimaryRequested ? (i === 0 ? 1 : 0) : ((existingCount === 0 && i === 0) ? 1 : 0);
 
       run(`INSERT INTO product_media (
         id, product_id, file_path, alt_text, sort_order, is_primary, crop_desktop, crop_mobile
       ) VALUES (?, ?, ?, ?, ?, ?, '4:5', '1:1')`, [
-        mediaId, product_id, filePath, alt_text || 'Saree product image', sortOrder, isPrimary
+        mediaId, product_id, filePath, alt_text || 'Product image', sortOrder, isPrimary
       ]);
 
       inserted.push({
         id: mediaId,
         product_id,
         file_path: filePath,
-        alt_text: alt_text || 'Saree product image',
+        alt_text: alt_text || 'Product image',
         sort_order: sortOrder,
         is_primary: Boolean(isPrimary),
         crop_desktop: '4:5',
@@ -94,7 +107,7 @@ router.post('/upload', requireRole(['SUPER_ADMIN', 'ADMIN']), upload.array('phot
   recordAudit(req, 'MEDIA', product_id, 'UPLOAD_PHOTOS', null, { uploaded_count: files.length });
   broadcastEvent('product_updated', { id: product_id, action: 'media_uploaded' });
 
-  res.status(201).json({ success: true, media: inserted });
+  res.status(201).json({ success: true, file_path: inserted[0]?.file_path, media: inserted });
 });
 
 // Set Primary Photo

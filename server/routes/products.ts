@@ -299,8 +299,14 @@ router.post('/', requireRole(['SUPER_ADMIN', 'ADMIN']), (req: AuthenticatedReque
         ]);
       }
 
-      for (let i = 0; i < media.length; i++) {
-        const m = media[i];
+      const mediaList = (media && media.length > 0) ? media : [{
+        file_path: (req.body.photo_url && String(req.body.photo_url).trim()) || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1000&q=80',
+        alt_text: name,
+        is_primary: 1
+      }];
+
+      for (let i = 0; i < mediaList.length; i++) {
+        const m = mediaList[i];
         const mId = 'med-' + Date.now().toString(36) + '-' + i;
         run(`INSERT INTO product_media (
           id, product_id, file_path, alt_text, sort_order, is_primary, crop_desktop, crop_mobile
@@ -340,6 +346,7 @@ router.put('/:id', requireRole(['SUPER_ADMIN', 'ADMIN']), (req: AuthenticatedReq
     seo_title,
     seo_description,
     canonical_url,
+    photo_url,
     variants = []
   } = req.body;
 
@@ -379,6 +386,32 @@ router.put('/:id', requireRole(['SUPER_ADMIN', 'ADMIN']), (req: AuthenticatedReq
               v.low_stock_threshold, v.id
             ]);
           }
+        }
+      }
+
+      // Update or insert primary photo if photo_url was passed
+      if (photo_url && typeof photo_url === 'string' && photo_url.trim()) {
+        const trimmedPhoto = photo_url.trim();
+        const existingPrimary = queryOne<{ id: string; file_path: string }>(
+          'SELECT id, file_path FROM product_media WHERE product_id = ? AND is_primary = 1',
+          [id]
+        );
+        const existingAny = queryOne<{ id: string; file_path: string }>(
+          'SELECT id, file_path FROM product_media WHERE product_id = ? ORDER BY sort_order ASC LIMIT 1',
+          [id]
+        );
+
+        if (existingPrimary) {
+          run('UPDATE product_media SET file_path = ? WHERE id = ?', [trimmedPhoto, existingPrimary.id]);
+        } else if (existingAny) {
+          run('UPDATE product_media SET file_path = ?, is_primary = 1 WHERE id = ?', [trimmedPhoto, existingAny.id]);
+        } else {
+          const mediaId = 'med-' + Date.now().toString(36) + '-0';
+          run(`INSERT INTO product_media (
+            id, product_id, file_path, alt_text, sort_order, is_primary, crop_desktop, crop_mobile
+          ) VALUES (?, ?, ?, ?, 1, 1, '4:5', '1:1')`, [
+            mediaId, id, trimmedPhoto, name || 'Product image'
+          ]);
         }
       }
     });

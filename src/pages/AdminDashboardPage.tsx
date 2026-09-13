@@ -124,6 +124,50 @@ export const AdminDashboardPage: React.FC = () => {
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
   const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const fileInputProductRef = React.useRef<HTMLInputElement>(null);
+  const fileInputArticleRef = React.useRef<HTMLInputElement>(null);
+
+  const handleUploadPhotoFile = async (file: File, target: 'product' | 'newArticle') => {
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('photos', file);
+    if (target === 'product' && editingProduct) {
+      formData.append('product_id', editingProduct.id);
+      formData.append('is_primary', 'true');
+    }
+
+    try {
+      setIsUploadingPhoto(true);
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/media/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to upload photo');
+      }
+
+      const data = await res.json();
+      const uploadedPath = data.file_path || (data.media && data.media[0]?.file_path);
+      if (uploadedPath) {
+        if (target === 'product') {
+          setProductFormData(prev => ({ ...prev, photo_url: uploadedPath }));
+        } else {
+          setNewArticleForm(prev => ({ ...prev, photo_url: uploadedPath }));
+        }
+        showNotification('Photo uploaded from device successfully!');
+      }
+    } catch (err: any) {
+      showNotification(err.message || 'Image upload failed', 'error');
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
+
   // Product Form State for New / Edit Modal
   const [productFormData, setProductFormData] = useState({
     name: '',
@@ -454,7 +498,7 @@ export const AdminDashboardPage: React.FC = () => {
       sale_price: v?.sale_price ? String(v.sale_price) : '',
       quantity: v?.quantity !== undefined ? String(v.quantity) : '1',
       low_stock_threshold: v?.low_stock_threshold !== undefined ? String(v.low_stock_threshold) : '2',
-      photo_url: p.media?.[0]?.file_path || '',
+      photo_url: p.media?.find(m => m.is_primary)?.file_path || p.media?.[0]?.file_path || '',
       alt_text: p.media?.[0]?.alt_text || p.name
     });
     setIsProductModalOpen(true);
@@ -489,6 +533,7 @@ export const AdminDashboardPage: React.FC = () => {
             homepage_placement: productFormData.homepage_placement,
             status: productFormData.status,
             is_featured: productFormData.is_featured ? 1 : 0,
+            photo_url: productFormData.photo_url || undefined,
             variants: [
               {
                 id: editingProduct.variants?.[0]?.id,
@@ -504,7 +549,7 @@ export const AdminDashboardPage: React.FC = () => {
             ]
           })
         });
-        showNotification('Saree weave updated successfully!');
+        showNotification('Product updated successfully!');
       } else {
         await apiRequest('/products', {
           method: 'POST',
@@ -518,6 +563,7 @@ export const AdminDashboardPage: React.FC = () => {
             homepage_placement: productFormData.homepage_placement,
             status: productFormData.status,
             is_featured: productFormData.is_featured ? 1 : 0,
+            photo_url: productFormData.photo_url || undefined,
             variants: [
               {
                 sku: productFormData.sku,
@@ -540,7 +586,7 @@ export const AdminDashboardPage: React.FC = () => {
             ]
           })
         });
-        showNotification('New saree weave created and published to catalog!');
+        showNotification('New product created and published to catalog!');
       }
 
       setIsProductModalOpen(false);
@@ -1040,7 +1086,7 @@ export const AdminDashboardPage: React.FC = () => {
                 className="btn-primary"
               >
                 <Plus size={16} />
-                <span>New Saree Weave</span>
+                <span>+ Add Product / Article</span>
               </button>
             </div>
 
@@ -1049,7 +1095,7 @@ export const AdminDashboardPage: React.FC = () => {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left' }}>
                 <thead style={{ backgroundColor: '#F8FAFC', borderBottom: '1px solid #E2E8F0', color: '#64748B', textTransform: 'uppercase', fontSize: '0.72rem', letterSpacing: '0.06em' }}>
                   <tr>
-                    <th style={{ padding: '14px 16px' }}>Saree Weave</th>
+                    <th style={{ padding: '14px 16px' }}>Product / Article</th>
                     <th style={{ padding: '14px 16px' }}>Category</th>
                     <th style={{ padding: '14px 16px' }}>Fabric & Care</th>
                     <th style={{ padding: '14px 16px' }}>Variants & Stock</th>
@@ -2323,26 +2369,103 @@ export const AdminDashboardPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '4px', color: '#0F172A' }}>
-                    Photo Image URL
+                <div style={{ backgroundColor: '#F8FAFC', padding: '12px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px', color: '#0F172A' }}>
+                    📸 Article Photography <span style={{ fontSize: '0.75rem', fontWeight: 400, color: '#64748B' }}>(Upload file or paste link)</span>
                   </label>
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    {newArticleForm.photo_url && (
-                      <img
-                        src={newArticleForm.photo_url}
-                        alt="Preview"
-                        style={{ width: '42px', height: '42px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #CBD5E1', flexShrink: 0 }}
-                      />
-                    )}
+
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
                     <input
-                      type="url"
-                      value={newArticleForm.photo_url}
-                      onChange={e => setNewArticleForm({ ...newArticleForm, photo_url: e.target.value })}
-                      placeholder="https://..."
-                      style={{ flex: 1, padding: '9px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.82rem' }}
+                      ref={fileInputArticleRef}
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadPhotoFile(file, 'newArticle');
+                      }}
                     />
+                    <button
+                      type="button"
+                      disabled={isUploadingPhoto}
+                      onClick={() => fileInputArticleRef.current?.click()}
+                      className="btn-primary"
+                      style={{
+                        padding: '7px 12px',
+                        fontSize: '0.78rem',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        backgroundColor: 'var(--color-emerald)',
+                        color: '#fff',
+                        cursor: isUploadingPhoto ? 'wait' : 'pointer'
+                      }}
+                    >
+                      <Upload size={14} />
+                      <span>{isUploadingPhoto ? 'Uploading from device...' : '📁 Upload Photo from Computer'}</span>
+                    </button>
                   </div>
+
+                  <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: 600 }}>Presets:</span>
+                    <button
+                      type="button"
+                      onClick={() => setNewArticleForm({ ...newArticleForm, photo_url: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=1000&q=80' })}
+                      style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#fff', cursor: 'pointer' }}
+                    >
+                      👗 Dress
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewArticleForm({ ...newArticleForm, photo_url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1000&q=80' })}
+                      style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#fff', cursor: 'pointer' }}
+                    >
+                      🥻 Saree
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewArticleForm({ ...newArticleForm, photo_url: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=1000&q=80' })}
+                      style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#fff', cursor: 'pointer' }}
+                    >
+                      ✨ Kurti
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewArticleForm({ ...newArticleForm, photo_url: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=1000&q=80' })}
+                      style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#fff', cursor: 'pointer' }}
+                    >
+                      💃 Lehenga
+                    </button>
+                  </div>
+
+                  <input
+                    type="text"
+                    value={newArticleForm.photo_url}
+                    onChange={e => setNewArticleForm({ ...newArticleForm, photo_url: e.target.value })}
+                    placeholder="Or enter image URL (https://...) - Optional"
+                    style={{ width: '100%', padding: '7px 10px', borderRadius: '5px', border: '1px solid #CBD5E1', fontSize: '0.8rem', backgroundColor: '#fff' }}
+                  />
+
+                  {newArticleForm.photo_url && (
+                    <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 8px', background: '#fff', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <img
+                          src={newArticleForm.photo_url}
+                          alt="Preview"
+                          style={{ width: '38px', height: '48px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #CBD5E1' }}
+                          onError={e => { (e.target as any).style.display = 'none'; }}
+                        />
+                        <span style={{ fontSize: '0.72rem', color: '#166534', fontWeight: 600 }}>✓ Photo Selected</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setNewArticleForm({ ...newArticleForm, photo_url: '' })}
+                        style={{ background: 'none', border: 'none', color: '#EF4444', fontSize: '0.72rem', cursor: 'pointer', fontWeight: 600 }}
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px', marginTop: '10px', borderTop: '1px solid #E2E8F0', paddingTop: '16px' }}>
@@ -2496,7 +2619,7 @@ export const AdminDashboardPage: React.FC = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid #E2E8F0', paddingBottom: '12px' }}>
               <div>
                 <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--color-emerald)', fontFamily: 'Cinzel, serif' }}>
-                  {editingProduct ? 'Edit Saree Weave Details' : 'Add New Saree Weave'}
+                  {editingProduct ? 'Edit Product Details' : 'Add New Product'}
                 </h3>
                 <p style={{ fontSize: '0.82rem', color: '#64748B' }}>
                   Configure product specifications, pricing safeguards, fabric details, and photography visuals.
@@ -2516,7 +2639,7 @@ export const AdminDashboardPage: React.FC = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '14px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#0F172A', marginBottom: '4px' }}>
-                    Saree / Weave Name *
+                    Product / Article Name *
                   </label>
                   <input
                     type="text"
@@ -2524,7 +2647,7 @@ export const AdminDashboardPage: React.FC = () => {
                     id="input-product-name"
                     value={productFormData.name}
                     onChange={e => setProductFormData({ ...productFormData, name: e.target.value })}
-                    placeholder="e.g. Banarasi Handloom Katan Silk Brocade Saree"
+                    placeholder="e.g. Surat Embroidered Dress / Banarasi Silk Saree"
                     style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
                   />
                 </div>
@@ -2745,31 +2868,117 @@ export const AdminDashboardPage: React.FC = () => {
               </div>
 
               {/* Photo and Placement */}
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '14px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#0F172A', marginBottom: '4px' }}>
-                    Primary Photography URL *
+              <div style={{ display: 'grid', gridTemplateColumns: '1.7fr 1.3fr', gap: '14px' }}>
+                <div style={{ backgroundColor: '#F8FAFC', padding: '14px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                  <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 700, color: '#0F172A', marginBottom: '6px' }}>
+                    📸 Primary Product Photo <span style={{ fontSize: '0.75rem', fontWeight: 400, color: '#64748B' }}>(Upload file or paste link)</span>
                   </label>
+
+                  {/* Direct File Upload Button */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
+                    <input
+                      ref={fileInputProductRef}
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadPhotoFile(file, 'product');
+                      }}
+                    />
+                    <button
+                      type="button"
+                      disabled={isUploadingPhoto}
+                      onClick={() => fileInputProductRef.current?.click()}
+                      className="btn-primary"
+                      style={{
+                        padding: '8px 14px',
+                        fontSize: '0.8rem',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        backgroundColor: 'var(--color-emerald)',
+                        color: '#fff',
+                        cursor: isUploadingPhoto ? 'wait' : 'pointer'
+                      }}
+                    >
+                      <Upload size={15} />
+                      <span>{isUploadingPhoto ? 'Uploading from device...' : '📁 Upload Photo from Computer'}</span>
+                    </button>
+                  </div>
+
+                  {/* Quick Preset Samples */}
+                  <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#64748B', fontWeight: 600 }}>Quick Samples:</span>
+                    <button
+                      type="button"
+                      onClick={() => setProductFormData({ ...productFormData, photo_url: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=1000&q=80' })}
+                      style={{ fontSize: '0.7rem', padding: '3px 8px', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#fff', cursor: 'pointer' }}
+                    >
+                      👗 Dress
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setProductFormData({ ...productFormData, photo_url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1000&q=80' })}
+                      style={{ fontSize: '0.7rem', padding: '3px 8px', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#fff', cursor: 'pointer' }}
+                    >
+                      🥻 Saree
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setProductFormData({ ...productFormData, photo_url: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=1000&q=80' })}
+                      style={{ fontSize: '0.7rem', padding: '3px 8px', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#fff', cursor: 'pointer' }}
+                    >
+                      ✨ Kurti
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setProductFormData({ ...productFormData, photo_url: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=1000&q=80' })}
+                      style={{ fontSize: '0.7rem', padding: '3px 8px', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#fff', cursor: 'pointer' }}
+                    >
+                      💃 Lehenga
+                    </button>
+                  </div>
+
+                  {/* URL Text Input (Optional) */}
                   <input
-                    type="url"
-                    required
+                    type="text"
                     id="input-product-photo"
                     value={productFormData.photo_url}
                     onChange={e => setProductFormData({ ...productFormData, photo_url: e.target.value })}
-                    placeholder="https://images.unsplash.com/..."
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
+                    placeholder="Or enter image URL (https://...) - Optional"
+                    style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.8rem', backgroundColor: '#fff' }}
                   />
+
+                  {/* Photo Preview */}
                   {productFormData.photo_url && (
-                    <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <img
-                        src={productFormData.photo_url}
-                        alt="Preview"
-                        style={{ width: '48px', height: '60px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #CBD5E1' }}
-                        onError={e => { (e.target as any).style.display = 'none'; }}
-                      />
-                      <span style={{ fontSize: '0.75rem', color: '#64748B' }}>Visual photography preview</span>
+                    <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', background: '#fff', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <img
+                          src={productFormData.photo_url}
+                          alt="Preview"
+                          style={{ width: '45px', height: '55px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #CBD5E1' }}
+                          onError={e => { (e.target as any).style.display = 'none'; }}
+                        />
+                        <div>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#166534', display: 'block' }}>✓ Photo Active</span>
+                          <span style={{ fontSize: '0.7rem', color: '#64748B', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+                            {productFormData.photo_url}
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setProductFormData({ ...productFormData, photo_url: '' })}
+                        style={{ background: 'none', border: 'none', color: '#EF4444', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600, padding: '4px 8px' }}
+                      >
+                        Clear
+                      </button>
                     </div>
                   )}
+                  <p style={{ fontSize: '0.72rem', color: '#64748B', marginTop: '6px', marginBottom: 0 }}>
+                    💡 Tip: If left blank, a default elegant photography will be used automatically. You can also manage additional angles anytime in the Media & Gallery tab.
+                  </p>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -2834,10 +3043,11 @@ export const AdminDashboardPage: React.FC = () => {
                 <button
                   type="submit"
                   className="btn-primary"
-                  id="btn-save-saree-weave"
-                  style={{ padding: '10px 24px', backgroundColor: 'var(--color-emerald)', color: '#fff' }}
+                  id="btn-save-product"
+                  style={{ padding: '10px 24px', backgroundColor: 'var(--color-emerald)', color: '#fff', display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', fontWeight: 700 }}
                 >
-                  {editingProduct ? 'Save Saree Changes' : 'Publish Saree to Catalog'}
+                  <CheckCircle size={18} />
+                  <span>{editingProduct ? 'Save Changes' : 'Save & Publish Product'}</span>
                 </button>
               </div>
             </form>
