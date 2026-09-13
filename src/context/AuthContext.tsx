@@ -30,20 +30,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  // Check existing session
+  // Ensure storefront starts clean as customer; admin access requires explicit credentials
   useEffect(() => {
-    const savedUserId = localStorage.getItem('if_active_user_id');
-    if (savedUserId) {
-      apiRequest<{ user: User | null }>('/auth/me')
-        .then(res => {
-          if (res.user) {
-            setCurrentUser(res.user);
-          }
-        })
-        .catch(() => {
-          localStorage.removeItem('if_active_user_id');
-        });
-    }
+    localStorage.removeItem('if_active_user_id');
+    setCurrentUser(null);
   }, []);
 
   const switchRole = async (role: UserRole | 'CUSTOMER') => {

@@ -10,26 +10,39 @@ interface AdminLoginModalProps {
 
 export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const { login } = useAuth();
-  const [email, setEmail] = useState('owner@indiafashions.com');
+  const [email, setEmail] = useState('admin');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  React.useEffect(() => {
+    if (isOpen) {
+      setPassword('');
+      setError(null);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!password.trim()) {
+      setError('Please enter your Super Admin password');
+      return;
+    }
     setError(null);
     setLoading(true);
 
     try {
       await login(email.trim(), password.trim());
+      setPassword('');
       setLoading(false);
       onSuccess();
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Invalid credentials or non-admin access');
+      setPassword('');
+      setError(err.message || 'Invalid Super Admin credentials');
       setLoading(false);
     }
   };
@@ -203,42 +216,25 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ isOpen, onClos
             </div>
           </div>
 
-          {/* Discreet Credentials Helper */}
+          {/* Security Notice */}
           <div
             style={{
               backgroundColor: '#F8FAFC',
-              border: '1px dashed #CBD5E1',
+              border: '1px solid #E2E8F0',
               borderRadius: '6px',
-              padding: '8px 12px',
+              padding: '10px 12px',
               marginBottom: '20px',
-              fontSize: '0.74rem',
-              color: '#475569',
+              fontSize: '0.75rem',
+              color: '#64748B',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between'
+              gap: '8px'
             }}
           >
+            <Lock size={14} color="#64748B" style={{ flexShrink: 0 }} />
             <span>
-              🔑 Default: <strong>owner@indiafashions.com</strong> / <strong>admin123</strong>
+              Restricted Area: Enter Super Admin email/username (<code>admin</code>) &amp; master password to proceed.
             </span>
-            <button
-              type="button"
-              onClick={() => {
-                setEmail('owner@indiafashions.com');
-                setPassword('admin123');
-              }}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'var(--color-emerald)',
-                fontWeight: 700,
-                cursor: 'pointer',
-                fontSize: '0.72rem',
-                textDecoration: 'underline'
-              }}
-            >
-              Fill
-            </button>
           </div>
 
           <div style={{ display: 'flex', gap: '10px' }}>

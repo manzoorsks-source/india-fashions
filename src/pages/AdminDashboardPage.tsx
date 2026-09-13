@@ -874,7 +874,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onBackTo
         <div style={{ padding: '16px 20px', borderTop: '1px solid #1E293B', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {onBackToStore && (
             <button
-              onClick={onBackToStore}
+              onClick={async () => {
+                await logout();
+                if (onBackToStore) onBackToStore();
+              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',

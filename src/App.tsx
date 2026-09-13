@@ -18,7 +18,7 @@ import { AdminDashboardPage } from './pages/AdminDashboardPage.js';
 import { Product } from '../shared/types.js';
 
 export const AppContent: React.FC = () => {
-  const { currentRole } = useAuth();
+  const { currentRole, logout } = useAuth();
   const [currentView, setCurrentView] = useState<'store' | 'admin' | 'tracking'>('store');
   const [activePage, setActivePage] = useState<'home' | 'category' | 'pdp' | 'checkout'>('home');
   const [selectedCategorySlug, setSelectedCategorySlug] = useState<string>('all');
@@ -69,12 +69,7 @@ export const AppContent: React.FC = () => {
         }}
         onSelectCategory={handleSelectCategory}
         onOpenAdminLogin={() => {
-          if (currentRole === 'SUPER_ADMIN') {
-            setCurrentView('admin');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          } else {
-            setIsAdminLoginModalOpen(true);
-          }
+          setIsAdminLoginModalOpen(true);
         }}
       />
 
@@ -82,7 +77,11 @@ export const AppContent: React.FC = () => {
       <div style={{ flex: 1 }}>
         {currentView === 'admin' ? (
           currentRole === 'SUPER_ADMIN' ? (
-            <AdminDashboardPage onBackToStore={() => setCurrentView('store')} />
+            <AdminDashboardPage onBackToStore={async () => {
+              await logout();
+              setCurrentView('store');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }} />
           ) : (
             <div style={{ padding: '80px 20px', textAlign: 'center', backgroundColor: '#F8FAFC', minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <div style={{ maxWidth: '420px', width: '100%', padding: '36px 28px', backgroundColor: '#ffffff', borderRadius: '12px', boxShadow: '0 12px 30px rgba(0,0,0,0.08)', border: '1.5px solid var(--color-gold)' }}>
@@ -172,12 +171,7 @@ export const AppContent: React.FC = () => {
       {currentView !== 'admin' && (
         <Footer
           onOpenAdminLogin={() => {
-            if (currentRole === 'SUPER_ADMIN') {
-              setCurrentView('admin');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            } else {
-              setIsAdminLoginModalOpen(true);
-            }
+            setIsAdminLoginModalOpen(true);
           }}
         />
       )}

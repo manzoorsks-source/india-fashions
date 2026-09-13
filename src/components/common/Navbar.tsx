@@ -235,14 +235,11 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Discreet Staff Key Symbol (Unobtrusive for customers) */}
           <button
             onClick={() => {
-              if (currentRole === 'SUPER_ADMIN') {
-                setCurrentView(currentView === 'admin' ? 'store' : 'admin');
-              } else if (onOpenAdminLogin) {
+              if (onOpenAdminLogin) {
                 onOpenAdminLogin();
               }
             }}
             aria-label="Staff Key"
-            title={currentRole === 'SUPER_ADMIN' ? (currentView === 'admin' ? 'Switch to Storefront' : 'Super Admin Console') : 'Staff Access'}
             style={{
               width: '32px',
               height: '32px',
@@ -250,15 +247,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: currentRole === 'SUPER_ADMIN' ? 'rgba(212, 175, 55, 0.18)' : 'transparent',
-              border: currentRole === 'SUPER_ADMIN' ? '1px solid var(--color-gold)' : 'none',
-              color: currentRole === 'SUPER_ADMIN' ? 'var(--color-emerald)' : '#94A3B8',
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: '#94A3B8',
               cursor: 'pointer',
-              transition: 'all 0.2s',
-              opacity: currentRole === 'SUPER_ADMIN' ? 1 : 0.4
+              transition: 'opacity 0.2s',
+              opacity: 0.35,
+              marginLeft: '4px'
             }}
-            onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-            onMouseLeave={e => (e.currentTarget.style.opacity = currentRole === 'SUPER_ADMIN' ? '1' : '0.4')}
+            onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
+            onMouseLeave={e => (e.currentTarget.style.opacity = '0.35')}
           >
             <KeyRound size={15} />
           </button>
@@ -369,25 +367,15 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             Track My Order
           </button>
-          {currentRole === 'SUPER_ADMIN' ? (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '10px' }}>
             <button
-              onClick={() => { setCurrentView(currentView === 'admin' ? 'store' : 'admin'); setMobileMenuOpen(false); }}
-              style={{ textAlign: 'left', fontWeight: 600, padding: '8px 0', color: 'var(--color-emerald)', display: 'flex', alignItems: 'center', gap: '8px' }}
+              onClick={() => { setMobileMenuOpen(false); onOpenAdminLogin?.(); }}
+              style={{ background: 'none', border: 'none', color: '#94A3B8', opacity: 0.3, cursor: 'pointer', padding: '6px' }}
+              aria-label="Staff Key"
             >
-              <KeyRound size={16} color="var(--color-gold)" />
-              <span>{currentView === 'admin' ? 'Return to Customer Store' : 'Super Admin Console'}</span>
+              <KeyRound size={14} />
             </button>
-          ) : (
-            <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '10px' }}>
-              <button
-                onClick={() => { setMobileMenuOpen(false); onOpenAdminLogin?.(); }}
-                style={{ background: 'none', border: 'none', color: '#94A3B8', opacity: 0.35, cursor: 'pointer', padding: '6px' }}
-                aria-label="Staff Key"
-              >
-                <KeyRound size={14} />
-              </button>
-            </div>
-          )}
+          </div>
         </div>
       )}
 
