@@ -8,9 +8,10 @@ interface NavbarProps {
   currentView: 'store' | 'admin' | 'tracking';
   setCurrentView: (view: 'store' | 'admin' | 'tracking') => void;
   onSearchClick?: () => void;
+  onSelectCategory?: (slug: string) => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView, onSearchClick }) => {
+export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView, onSearchClick, onSelectCategory }) => {
   const { settings, cartCount, setIsCartDrawerOpen, openDeliveryModal } = useStore();
   const { currentRole, currentUser, switchRole } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -20,11 +21,12 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView, onS
   const tagline = settings?.tagline || 'Royal Heritage Handwoven Weaves';
 
   const categories = [
-    { name: 'Sarees', slug: 'sarees', active: true, tag: 'Primary Collection' },
-    { name: 'Punjabi Dresses', slug: 'punjabi-dresses', active: false, tag: 'Coming Soon' },
-    { name: 'Children', slug: 'children', active: false, tag: 'Coming Soon' },
-    { name: 'Kurti', slug: 'kurti', active: false, tag: 'Coming Soon' },
-    { name: 'Lehenga', slug: 'lehenga', active: false, tag: 'Coming Soon' },
+    { name: 'All Collections', slug: 'all', active: true, tag: 'Full Catalog' },
+    { name: 'Sarees', slug: 'sarees', active: true, tag: '12 Designs' },
+    { name: 'Punjabi Dresses', slug: 'punjabi-dresses', active: true, tag: '4 Designs' },
+    { name: 'Kurti', slug: 'kurti', active: true, tag: '2 Designs' },
+    { name: 'Lehenga', slug: 'lehenga', active: true, tag: '2 Designs' },
+    { name: 'Children', slug: 'children', active: true, tag: '2 Designs' },
     { name: 'Salwar Suit', slug: 'salwar-suit', active: false, tag: 'Coming Soon' },
     { name: "Men's Ethnic", slug: 'mens-ethnic', active: false, tag: 'Coming Soon' },
     { name: 'Accessories', slug: 'accessories', active: false, tag: 'Coming Soon' },
@@ -181,10 +183,12 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView, onS
                   <div
                     key={cat.slug}
                     onClick={() => {
-                      setCurrentView('store');
                       setCategoryDropdownOpen(false);
-                      const el = document.getElementById('saree-collection');
-                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      if (onSelectCategory) {
+                        onSelectCategory(cat.slug);
+                      } else {
+                        setCurrentView('store');
+                      }
                     }}
                     style={{
                       padding: '8px 16px',
@@ -349,8 +353,42 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView, onS
             onClick={() => { setCurrentView('store'); setMobileMenuOpen(false); }}
             style={{ textAlign: 'left', fontWeight: 600, padding: '8px 0', color: 'var(--color-emerald)' }}
           >
-            Home & Featured Sarees
+            Home
           </button>
+
+          <div style={{ borderTop: '1px solid var(--color-border-subtle)', paddingTop: '10px' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-gold-dark)', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: '8px' }}>
+              Shop By Category
+            </span>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              {categories.filter(c => c.active).map(c => (
+                <button
+                  key={c.slug}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    if (onSelectCategory) {
+                      onSelectCategory(c.slug);
+                    } else {
+                      setCurrentView('store');
+                    }
+                  }}
+                  style={{
+                    textAlign: 'left',
+                    padding: '8px 10px',
+                    borderRadius: '6px',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid var(--color-border-subtle)',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    color: 'var(--color-charcoal)'
+                  }}
+                >
+                  {c.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <button
             onClick={() => { openDeliveryModal(); setMobileMenuOpen(false); }}
             style={{ textAlign: 'left', fontWeight: 500, padding: '8px 0', color: 'var(--color-charcoal)' }}

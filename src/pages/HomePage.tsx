@@ -6,11 +6,12 @@ import { ProductCarousel } from '../components/customer/ProductCarousel.js';
 import { ProductCard } from '../components/customer/ProductCard.js';
 import { TrustPoints } from '../components/customer/TrustPoints.js';
 import { useStore } from '../context/StoreContext.js';
-import { Sparkles, ArrowRight, Clock } from 'lucide-react';
+import { Sparkles, ArrowRight, Clock, ArrowUpRight } from 'lucide-react';
 
 interface HomePageProps {
   onSelectProduct: (product: Product) => void;
   onExploreCollection: () => void;
+  onSelectCategory?: (slug: string) => void;
 }
 
 const CountdownBadge: React.FC<{ endAt: string }> = ({ endAt }) => {
@@ -58,9 +59,57 @@ const CountdownBadge: React.FC<{ endAt: string }> = ({ endAt }) => {
   );
 };
 
-export const HomePage: React.FC<HomePageProps> = ({ onSelectProduct, onExploreCollection }) => {
+const CATEGORY_SHOWCASE = [
+  {
+    slug: 'sarees',
+    name: 'Heirloom Sarees',
+    icon: '🥻',
+    subtitle: 'Kanjivaram • Banarasi • Chanderi',
+    countText: '12 Masterpieces',
+    image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=600'
+  },
+  {
+    slug: 'punjabi-dresses',
+    name: 'Punjabi Dresses',
+    icon: '👗',
+    subtitle: 'Surat Chanderi • Patiala Zari • Anarkali',
+    countText: '4 Designer Suits',
+    image: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=600'
+  },
+  {
+    slug: 'kurti',
+    name: 'Designer Kurtis',
+    icon: '🌸',
+    subtitle: 'Lucknowi Chikankari • Banarasi Brocades',
+    countText: '2 Artisanal Sets',
+    image: 'https://images.unsplash.com/photo-1609357605129-26f69add5d6e?auto=format&fit=crop&q=80&w=600'
+  },
+  {
+    slug: 'lehenga',
+    name: 'Royal Lehengas',
+    icon: '💃',
+    subtitle: 'Bridal Banarasi Silk • Velvet Heavy Zari',
+    countText: '2 Bridal Ensembles',
+    image: 'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?auto=format&fit=crop&q=80&w=600'
+  },
+  {
+    slug: 'children',
+    name: 'Children Festive',
+    icon: '👧',
+    subtitle: 'Pure Silk Pattu Pavadai • Kurta Dhotis',
+    countText: '2 Festive Outfits',
+    image: 'https://images.unsplash.com/photo-1621786030684-4c6382f480c8?auto=format&fit=crop&q=80&w=600'
+  }
+];
+
+export const HomePage: React.FC<HomePageProps> = ({
+  onSelectProduct,
+  onExploreCollection,
+  onSelectCategory
+}) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeCategoryTab, setActiveCategoryTab] = useState<string>('all');
   const { settings, activeCampaign, activeCampaigns, setActiveCampaign } = useStore();
 
   useEffect(() => {
@@ -74,8 +123,70 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProduct, onExploreCo
       .finally(() => setLoading(false));
   }, []);
 
-  const featuredSarees = products.filter(p => p.is_featured);
-  const newArrivals = products.filter(p => p.homepage_placement === 'NEW_ARRIVAL' || p.campaign_label === 'New arrival');
+  // Filter products by selected active category tab
+  const filteredProducts = activeCategoryTab === 'all'
+    ? products
+    : products.filter(p => {
+        if (p.category_slug === activeCategoryTab) return true;
+        if (p.category_id === `cat-${activeCategoryTab}`) return true;
+        if (activeCategoryTab === 'punjabi-dresses' && p.category_name?.toLowerCase().includes('punjabi')) return true;
+        if (activeCategoryTab === 'sarees' && p.category_name?.toLowerCase().includes('saree')) return true;
+        if (activeCategoryTab === 'kurti' && p.category_name?.toLowerCase().includes('kurti')) return true;
+        if (activeCategoryTab === 'lehenga' && p.category_name?.toLowerCase().includes('lehenga')) return true;
+        if (activeCategoryTab === 'children' && p.category_name?.toLowerCase().includes('child')) return true;
+        return false;
+      });
+
+  const getCategoryCount = (slug: string) => {
+    if (slug === 'all') return products.length;
+    return products.filter(p => {
+      if (p.category_slug === slug) return true;
+      if (p.category_id === `cat-${slug}`) return true;
+      if (slug === 'punjabi-dresses' && p.category_name?.toLowerCase().includes('punjabi')) return true;
+      if (slug === 'sarees' && p.category_name?.toLowerCase().includes('saree')) return true;
+      if (slug === 'kurti' && p.category_name?.toLowerCase().includes('kurti')) return true;
+      if (slug === 'lehenga' && p.category_name?.toLowerCase().includes('lehenga')) return true;
+      if (slug === 'children' && p.category_name?.toLowerCase().includes('child')) return true;
+      return false;
+    }).length;
+  };
+
+  const currentTabMeta = {
+    all: {
+      title: 'Royal Heritage Masterpiece Collection',
+      subtitle: 'Complete Handcrafted Catalog',
+      desc: 'Discover authentic Kanjivaram & Banarasi sarees, Surat Punjabi dresses, Chikankari kurtis, and royal lehengas.'
+    },
+    sarees: {
+      title: 'Handpicked Festive Sarees',
+      subtitle: 'Heirloom Silk & Brocade Weaves',
+      desc: 'Timeless Kanchipuram temple korvai, Varanasi antique zari brocades, and gossamer Chanderi tissue weaves.'
+    },
+    'punjabi-dresses': {
+      title: 'Designer Punjabi Dresses & Salwar Suits',
+      subtitle: 'Surat Embroidery & Patiala Zari Weaves',
+      desc: 'Rich handcrafted Punjabi suits, Surat Chanderi embroidered sets, Patiala silk salwar suits, and celebratory Anarkalis.'
+    },
+    kurti: {
+      title: 'Handcrafted Festive Kurtis',
+      subtitle: 'Artisanal Chikankari & Brocades',
+      desc: 'Pure Lucknowi Chikankari hand embroidery and Banarasi brocade straight kurtis tailored for versatile elegance.'
+    },
+    lehenga: {
+      title: 'Royal Bridal & Festive Lehengas',
+      subtitle: 'Grand Celebratory Ensembles',
+      desc: 'Grand semi-stitched Banarasi silk bridal lehengas and heavy velvet zari cholis tailored for royal weddings.'
+    },
+    children: {
+      title: 'Children Heritage Festive Wear',
+      subtitle: 'Little Royalty Ensembles',
+      desc: 'Traditional pure silk Pattu Pavadai for young princesses and Jacquard silk kurta dhoti sets for young princes.'
+    }
+  }[activeCategoryTab] || {
+    title: 'Royal Heritage Collection',
+    subtitle: 'Handcrafted Weaves',
+    desc: 'Explore our curated Indian ethnic boutique collection.'
+  };
 
   return (
     <div style={{ backgroundColor: '#bce1f0', minHeight: '100vh', transition: 'background-color 0.3s ease' }}>
@@ -87,11 +198,145 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProduct, onExploreCo
         onSelectCampaign={setActiveCampaign}
       />
 
+      {/* Shop By Category Visual Cards Section */}
+      <section style={{ margin: '40px 0 20px' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--color-gold-dark)', textTransform: 'uppercase', letterSpacing: '0.14em', fontWeight: 800 }}>
+              Royal Indian Weaves & Couture
+            </span>
+            <h2 style={{ fontSize: '2.1rem', color: 'var(--color-emerald-dark)', fontFamily: 'var(--font-serif-brand)', marginTop: '4px' }}>
+              Shop By Category
+            </h2>
+            <p style={{ fontSize: '0.92rem', color: 'var(--color-charcoal-muted)', maxWidth: '620px', margin: '6px auto 0' }}>
+              Select a category below to explore dedicated heirloom handlooms and bespoke silhouettes.
+            </p>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+              gap: '18px'
+            }}
+          >
+            {CATEGORY_SHOWCASE.map(cat => (
+              <div
+                key={cat.slug}
+                onClick={() => {
+                  if (onSelectCategory) {
+                    onSelectCategory(cat.slug);
+                  } else {
+                    setActiveCategoryTab(cat.slug);
+                    const el = document.getElementById('collection-showcase');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                style={{
+                  position: 'relative',
+                  borderRadius: '12px',
+                  overflow: 'hidden',
+                  cursor: 'pointer',
+                  boxShadow: '0 6px 16px rgba(15, 95, 86, 0.12)',
+                  border: '1.5px solid var(--color-gold)',
+                  backgroundColor: '#0F5F56',
+                  height: '240px',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'translateY(-6px)';
+                  e.currentTarget.style.boxShadow = '0 12px 28px rgba(15, 95, 86, 0.25)';
+                  e.currentTarget.style.borderColor = 'var(--color-gold-bright)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(15, 95, 86, 0.12)';
+                  e.currentTarget.style.borderColor = 'var(--color-gold)';
+                }}
+              >
+                {/* Background Image */}
+                <img
+                  src={cat.image}
+                  alt={cat.name}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    filter: 'brightness(0.75)',
+                    transition: 'transform 0.5s ease'
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.08)')}
+                  onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1.0)')}
+                />
+
+                {/* Gradient Overlay */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    background: 'linear-gradient(to top, rgba(10, 35, 30, 0.92) 0%, rgba(10, 35, 30, 0.35) 60%, rgba(0,0,0,0.1) 100%)',
+                    zIndex: 1
+                  }}
+                />
+
+                {/* Top Badge */}
+                <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 2 }}>
+                  <span
+                    style={{
+                      backgroundColor: 'rgba(212, 175, 55, 0.95)',
+                      color: '#0A433D',
+                      fontSize: '0.7rem',
+                      fontWeight: 800,
+                      padding: '3px 8px',
+                      borderRadius: '12px',
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.3)'
+                    }}
+                  >
+                    {cat.countText}
+                  </span>
+                </div>
+
+                {/* Content */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    width: '100%',
+                    padding: '16px',
+                    zIndex: 2,
+                    color: '#ffffff'
+                  }}
+                >
+                  <span style={{ fontSize: '1.4rem', display: 'block', marginBottom: '2px' }}>{cat.icon}</span>
+                  <h3 style={{ fontSize: '1.2rem', fontFamily: 'var(--font-serif-brand)', fontWeight: 700, color: '#ffffff', marginBottom: '4px' }}>
+                    {cat.name}
+                  </h3>
+                  <p style={{ fontSize: '0.72rem', color: '#E2E8F0', opacity: 0.9, lineHeight: 1.3, marginBottom: '8px' }}>
+                    {cat.subtitle}
+                  </p>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', color: 'var(--color-gold-bright)', fontWeight: 700 }}>
+                    <span>Explore Collection</span>
+                    <ArrowUpRight size={14} />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Right-to-Left Product Showcase Carousel */}
       <ProductCarousel
-        title="Royal Saree Showcase"
-        subtitle="Drape the moment • Right to Left Gallery"
-        products={products.slice(0, 6)}
+        title="Royal Heritage Showcase"
+        subtitle="Drape the moment • Curated Masterpieces"
+        products={products.slice(0, 8)}
         onSelectProduct={onSelectProduct}
       />
 
@@ -210,41 +455,138 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProduct, onExploreCo
         </section>
       )}
 
-      {/* Featured Sarees Grid */}
-      <section id="saree-collection" style={{ margin: '48px 0' }}>
+      {/* Main Interactive Category Showcase Grid */}
+      <section id="collection-showcase" style={{ margin: '48px 0' }}>
+        {/* Anchor compatibility */}
+        <div id="saree-collection" style={{ position: 'relative', top: '-80px' }} />
+
         <div className="container">
-          <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+          {/* Section Header */}
+          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
             <p style={{ fontSize: '0.8rem', color: 'var(--color-gold-dark)', textTransform: 'uppercase', letterSpacing: '0.14em', fontWeight: 700, marginBottom: '6px' }}>
-              Masterpiece Catalog
+              {currentTabMeta.subtitle}
             </p>
             <h2 style={{ fontSize: '2.2rem', color: 'var(--color-emerald-dark)', fontFamily: 'var(--font-serif-brand)' }}>
-              Handpicked Festive Sarees
+              {currentTabMeta.title}
             </h2>
+            <p style={{ fontSize: '0.95rem', color: 'var(--color-charcoal-muted)', maxWidth: '680px', margin: '8px auto 0' }}>
+              {currentTabMeta.desc}
+            </p>
             <div className="royal-divider">
               <span className="royal-motif" />
             </div>
           </div>
 
+          {/* Interactive Category Filter Tabs */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+              flexWrap: 'wrap',
+              marginBottom: '36px'
+            }}
+          >
+            {[
+              { slug: 'all', label: 'All Collections', icon: '✨' },
+              { slug: 'sarees', label: 'Sarees', icon: '🥻' },
+              { slug: 'punjabi-dresses', label: 'Punjabi Dresses', icon: '👗' },
+              { slug: 'kurti', label: 'Kurtis', icon: '🌸' },
+              { slug: 'lehenga', label: 'Lehengas', icon: '💃' },
+              { slug: 'children', label: 'Children', icon: '👧' }
+            ].map(tab => {
+              const isActive = activeCategoryTab === tab.slug;
+              const count = getCategoryCount(tab.slug);
+              return (
+                <button
+                  key={tab.slug}
+                  onClick={() => setActiveCategoryTab(tab.slug)}
+                  style={{
+                    padding: '8px 18px',
+                    borderRadius: '24px',
+                    fontSize: '0.88rem',
+                    fontWeight: isActive ? 700 : 500,
+                    border: isActive ? '1.5px solid var(--color-gold)' : '1px solid var(--color-border-subtle)',
+                    backgroundColor: isActive ? 'var(--color-emerald)' : '#ffffff',
+                    color: isActive ? '#ffffff' : 'var(--color-charcoal)',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: isActive ? '0 4px 12px rgba(15, 95, 86, 0.2)' : '0 1px 3px rgba(0,0,0,0.06)',
+                    transition: 'all 0.2s ease',
+                    transform: isActive ? 'translateY(-1px)' : 'none'
+                  }}
+                >
+                  <span>{tab.icon}</span>
+                  <span>{tab.label}</span>
+                  <span
+                    style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      backgroundColor: isActive ? 'var(--color-gold)' : '#E2E8F0',
+                      color: isActive ? 'var(--color-emerald-dark)' : '#475569',
+                      padding: '1px 6px',
+                      borderRadius: '10px'
+                    }}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Product Grid Stage */}
           {loading ? (
             <div style={{ textAlign: 'center', padding: '60px 0', color: '#64748B' }}>
-              Loading handcrafted drapes...
+              Loading handcrafted weaves & silhouettes...
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '60px 20px', backgroundColor: 'var(--color-silk-cream)', borderRadius: '10px', border: '1px solid var(--color-border-subtle)' }}>
+              <p style={{ fontSize: '1rem', color: 'var(--color-charcoal)' }}>No products found in this category.</p>
             </div>
           ) : (
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                gap: '24px'
-              }}
-            >
-              {products.map(product => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onSelectProduct={onSelectProduct}
-                />
-              ))}
-            </div>
+            <>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                  gap: '24px'
+                }}
+              >
+                {filteredProducts.map(product => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onSelectProduct={onSelectProduct}
+                  />
+                ))}
+              </div>
+
+              {/* View Full Category in Catalog Button */}
+              <div style={{ textAlign: 'center', marginTop: '40px' }}>
+                <button
+                  onClick={() => {
+                    if (onSelectCategory) {
+                      onSelectCategory(activeCategoryTab);
+                    } else {
+                      onExploreCollection();
+                    }
+                  }}
+                  className="btn-gold"
+                  style={{ padding: '12px 32px', fontSize: '0.95rem' }}
+                >
+                  <span>
+                    {activeCategoryTab === 'all'
+                      ? 'Explore Complete Heritage Catalog'
+                      : `View All ${currentTabMeta.title} in Catalog`}
+                  </span>
+                  <ArrowRight size={18} />
+                </button>
+              </div>
+            </>
           )}
         </div>
       </section>

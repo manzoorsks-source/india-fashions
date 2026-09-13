@@ -119,9 +119,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelectProdu
       {/* Product Information */}
       <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
         <div>
-          <p style={{ fontSize: '0.75rem', color: 'var(--color-emerald)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600, marginBottom: '4px' }}>
-            {product.fabric}
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', marginBottom: '4px' }}>
+            <span style={{ fontSize: '0.72rem', color: 'var(--color-gold-dark)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700 }}>
+              {product.category_name || 'Handloom'}
+            </span>
+            {product.fabric && (
+              <span style={{ fontSize: '0.7rem', color: 'var(--color-charcoal-muted)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '140px' }}>
+                {product.fabric}
+              </span>
+            )}
+          </div>
           <h3
             style={{
               fontSize: '1rem',

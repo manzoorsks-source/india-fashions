@@ -19,12 +19,20 @@ import { Product } from '../shared/types.js';
 export const AppContent: React.FC = () => {
   const [currentView, setCurrentView] = useState<'store' | 'admin' | 'tracking'>('store');
   const [activePage, setActivePage] = useState<'home' | 'category' | 'pdp' | 'checkout'>('home');
+  const [selectedCategorySlug, setSelectedCategorySlug] = useState<string>('all');
   const [selectedProductSlug, setSelectedProductSlug] = useState<string | null>(null);
   const [trackedOrderId, setTrackedOrderId] = useState<string | null>(null);
 
   const handleSelectProduct = (product: Product) => {
     setSelectedProductSlug(product.slug || product.id);
     setActivePage('pdp');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSelectCategory = (slug: string) => {
+    setSelectedCategorySlug(slug);
+    setCurrentView('store');
+    setActivePage('category');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -52,6 +60,7 @@ export const AppContent: React.FC = () => {
           setActivePage('category');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
+        onSelectCategory={handleSelectCategory}
       />
 
       {/* Main Content Area */}
@@ -71,15 +80,17 @@ export const AppContent: React.FC = () => {
             {activePage === 'home' && (
               <HomePage
                 onSelectProduct={handleSelectProduct}
-                onExploreCollection={() => {
-                  setActivePage('category');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
+                onSelectCategory={handleSelectCategory}
+                onExploreCollection={() => handleSelectCategory('all')}
               />
             )}
 
             {activePage === 'category' && (
-              <CategoryPage onSelectProduct={handleSelectProduct} />
+              <CategoryPage
+                selectedCategory={selectedCategorySlug}
+                onSelectCategory={(slug) => setSelectedCategorySlug(slug)}
+                onSelectProduct={handleSelectProduct}
+              />
             )}
 
             {activePage === 'pdp' && selectedProductSlug && (

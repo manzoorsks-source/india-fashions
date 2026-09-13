@@ -1,5 +1,5 @@
 import { Router, Response } from 'express';
-import { query, queryOne, run, transaction } from '../db/database.js';
+import { query, queryOne, run, transaction, saveDb } from '../db/database.js';
 import { AuthenticatedRequest, isCostPriceAllowed, requireRole } from '../middleware/auth.js';
 import { recordAudit } from '../middleware/audit.js';
 import { validateVariantPrices } from '../services/pricingService.js';
@@ -436,6 +436,251 @@ router.delete('/:id', requireRole(['SUPER_ADMIN', 'ADMIN']), (req: Authenticated
   broadcastEvent('product_updated', { id, action: 'archived' });
 
   res.json({ success: true });
+});
+
+// Demo Category Products for Punjabi Dresses, Kurtis, Lehengas, and Children
+export const demoCategoryProducts = [
+  // 1. PUNJABI DRESSES
+  {
+    id: 'prod-pjb-chanderi-surat',
+    name: 'Surat Embroidered Chanderi Silk Punjabi Suit',
+    slug: 'surat-embroidered-chanderi-silk-punjabi-suit',
+    category_id: 'cat-punjabi',
+    description: 'Direct from Surat artisan clusters, this lavish 3-piece unstitched suit material features ornate resham threadwork, a woven zari neckline, santoon inner bottom, and a regal digital print organza dupatta.',
+    fabric: 'Pure Chanderi Silk with Zari & Resham Threadwork',
+    care_instructions: 'Dry clean only. Gentle steam press on reverse.',
+    status: 'PUBLISHED',
+    is_featured: 1,
+    homepage_placement: 'FEATURED',
+    campaign_label: 'Surat Special',
+    variants: [
+      { id: 'var-sur-01', sku: 'SUR-PJB-01', size: 'Unstitched (Up to 44 Bust)', color: 'Royal Navy Blue & Rani Pink', color_code: '#102A43', cost_price: 1200, selling_price: 2499, sale_price: 1999, quantity: 15, low_stock_threshold: 3 },
+      { id: 'var-sur-02', sku: 'SUR-PJB-02', size: 'Unstitched (Up to 44 Bust)', color: 'Emerald Green & Antique Gold', color_code: '#0F5F56', cost_price: 1200, selling_price: 2499, sale_price: 2199, quantity: 10, low_stock_threshold: 3 }
+    ],
+    media: [
+      { id: 'med-sur-01', file_path: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=1000&q=80', alt_text: 'Surat embroidered Chanderi silk Punjabi suit set', sort_order: 1, is_primary: 1 }
+    ]
+  },
+  {
+    id: 'prod-pjb-patiala-silk',
+    name: 'Patiala Heavy Zari Weave Silk Salwar Suit',
+    slug: 'patiala-heavy-zari-weave-silk-salwar-suit',
+    category_id: 'cat-punjabi',
+    description: 'Festive bridal Patiala silhouette adorned with traditional gota patti borders, rich jacquard woven kurti, and heavy pleated Patiala salwar with contrasting Banarasi zari dupatta.',
+    fabric: 'Banarasi Art Silk with Heavy Jacquard Weave',
+    care_instructions: 'Strictly dry clean. Preserve in soft muslin cloth.',
+    status: 'PUBLISHED',
+    is_featured: 1,
+    homepage_placement: 'NEW_ARRIVAL',
+    campaign_label: 'Festive edit',
+    variants: [
+      { id: 'var-pat-01', sku: 'PAT-ZAR-01', size: 'Semi-Stitched (M to XXL)', color: 'Mustard Gold with Maroon Dupatta', color_code: '#D4AF37', cost_price: 1800, selling_price: 3499, sale_price: 2999, quantity: 12, low_stock_threshold: 3 },
+      { id: 'var-pat-02', sku: 'PAT-ZAR-02', size: 'Semi-Stitched (M to XXL)', color: 'Crimson Red with Antique Gold', color_code: '#6A1B29', cost_price: 1800, selling_price: 3499, sale_price: 2999, quantity: 8, low_stock_threshold: 3 }
+    ],
+    media: [
+      { id: 'med-pat-01', file_path: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1000&q=80', alt_text: 'Patiala silk salwar suit with heavy zari weave', sort_order: 1, is_primary: 1 }
+    ]
+  },
+  {
+    id: 'prod-pjb-georgette-anarkali',
+    name: 'Georgette Anarkali Festive Designer Suit',
+    slug: 'georgette-anarkali-festive-designer-suit',
+    category_id: 'cat-punjabi',
+    description: 'Graceful floor-length 56-inch flare Anarkali suit with delicate sequin coding embroidery, micro cotton inner lining, and embroidered nazneen dupatta with 4-side lace.',
+    fabric: 'Heavy Faux Georgette with 5mm Sequence Embroidery',
+    care_instructions: 'Dry clean only.',
+    status: 'PUBLISHED',
+    is_featured: 0,
+    homepage_placement: 'FEATURED',
+    campaign_label: 'Designer pick',
+    variants: [
+      { id: 'var-ank-01', sku: 'ANK-GEO-01', size: 'Free Size Stitched (XL)', color: 'Teal Peacock Blue', color_code: '#005F73', cost_price: 1600, selling_price: 3199, sale_price: 2699, quantity: 14, low_stock_threshold: 2 },
+      { id: 'var-ank-02', sku: 'ANK-GEO-02', size: 'Free Size Stitched (XL)', color: 'Festive Dusty Rose', color_code: '#B85D6F', cost_price: 1600, selling_price: 3199, sale_price: 2699, quantity: 9, low_stock_threshold: 2 }
+    ],
+    media: [
+      { id: 'med-ank-01', file_path: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=1000&q=80', alt_text: 'Designer Anarkali festive flared suit', sort_order: 1, is_primary: 1 }
+    ]
+  },
+
+  // 2. KURTIS
+  {
+    id: 'prod-krt-lucknowi-chikankari',
+    name: 'Lucknowi Chikankari Hand Embroidered Silk Kurti Set',
+    slug: 'lucknowi-chikankari-hand-embroidered-silk-kurti-set',
+    category_id: 'cat-kurti',
+    description: 'Handcrafted by master artisans of Lucknow, featuring intricate shadow work, phanda, and tepchi stitches embellished with delicate golden mukaish dots and matching cigarette pants.',
+    fabric: 'Mulmul Silk Blend with Authentic Chikankari & Mukaish',
+    care_instructions: 'Gentle hand wash in cold water or dry clean.',
+    status: 'PUBLISHED',
+    is_featured: 1,
+    homepage_placement: 'FEATURED',
+    campaign_label: 'Handcrafted',
+    variants: [
+      { id: 'var-luk-01', sku: 'LUK-CHK-01', size: 'M (38)', color: 'Ivory Gold', color_code: '#FAF7F2', cost_price: 950, selling_price: 1899, sale_price: 1599, quantity: 18, low_stock_threshold: 4 },
+      { id: 'var-luk-02', sku: 'LUK-CHK-02', size: 'L (40)', color: 'Sky Powder Blue', color_code: '#A0C4E2', cost_price: 950, selling_price: 1899, sale_price: 1599, quantity: 15, low_stock_threshold: 4 }
+    ],
+    media: [
+      { id: 'med-luk-01', file_path: 'https://images.unsplash.com/photo-1609357605129-26f69add5d6e?auto=format&fit=crop&w=1000&q=80', alt_text: 'Lucknowi Chikankari silk kurti set', sort_order: 1, is_primary: 1 }
+    ]
+  },
+  {
+    id: 'prod-krt-banarasi-brocade',
+    name: 'Banarasi Brocade Straight Cut Partywear Kurti',
+    slug: 'banarasi-brocade-straight-cut-partywear-kurti',
+    category_id: 'cat-kurti',
+    description: 'Sleek regal straight silhouette woven with metallic antique gold floral jaal, boat neckline with potli button accents, paired with raw silk culottes.',
+    fabric: 'Pure Katan Silk Brocade with Zari Bootis',
+    care_instructions: 'Dry clean only.',
+    status: 'PUBLISHED',
+    is_featured: 1,
+    homepage_placement: 'NEW_ARRIVAL',
+    campaign_label: 'New arrival',
+    variants: [
+      { id: 'var-ban-01', sku: 'BAN-KRT-01', size: 'L (40)', color: 'Deep Crimson Maroon', color_code: '#6A1B29', cost_price: 1100, selling_price: 2199, sale_price: 1899, quantity: 11, low_stock_threshold: 3 },
+      { id: 'var-ban-02', sku: 'BAN-KRT-02', size: 'XL (42)', color: 'Royal Emerald Green', color_code: '#0F5F56', cost_price: 1100, selling_price: 2199, sale_price: 1899, quantity: 8, low_stock_threshold: 3 }
+    ],
+    media: [
+      { id: 'med-ban-01', file_path: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=1000&q=80', alt_text: 'Banarasi brocade festive straight kurti', sort_order: 1, is_primary: 1 }
+    ]
+  },
+
+  // 3. LEHENGAS
+  {
+    id: 'prod-lh-banarasi-bridal',
+    name: 'Royal Banarasi Silk Semi-Stitched Bridal Lehenga',
+    slug: 'royal-banarasi-silk-semi-stitched-bridal-lehenga',
+    category_id: 'cat-lehenga',
+    description: 'A royal heirloom celebratory lehenga ensemble boasting a 4.2-meter circular kalidar ghera with temple kalash motifs, accompanied by an unstitched heavy brocade blouse piece and matching woven organza dupatta.',
+    fabric: 'Pure Handloom Katan Silk with Kadwa Antique Gold Zari',
+    care_instructions: 'Strictly dry clean. Store wrapped in unbleached muslin.',
+    status: 'PUBLISHED',
+    is_featured: 1,
+    homepage_placement: 'HERO',
+    campaign_label: 'Bridal Heritage',
+    variants: [
+      { id: 'var-lhb-01', sku: 'LH-BAN-01', size: 'Free Size (Up to 42 Waist)', color: 'Royal Crimson & Antique Zari', color_code: '#6A1B29', cost_price: 9500, selling_price: 16999, sale_price: 14500, quantity: 6, low_stock_threshold: 2 },
+      { id: 'var-lhb-02', sku: 'LH-BAN-02', size: 'Free Size (Up to 42 Waist)', color: 'Deep Wine Purple', color_code: '#4A154B', cost_price: 9500, selling_price: 16999, sale_price: 14500, quantity: 4, low_stock_threshold: 2 }
+    ],
+    media: [
+      { id: 'med-lhb-01', file_path: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=1000&q=80', alt_text: 'Royal Banarasi silk bridal lehenga ensemble', sort_order: 1, is_primary: 1 }
+    ]
+  },
+  {
+    id: 'prod-lh-velvet-zari',
+    name: 'Velvet Heavy Zari Embroidered Festive Lehenga Choli',
+    slug: 'velvet-heavy-zari-embroidered-festive-lehenga-choli',
+    category_id: 'cat-lehenga',
+    description: 'Opulent winter festive and wedding reception drape in lush micro velvet, featuring intricate dori embroidery, double cancan under-layer, and dual shaded soft net dupatta.',
+    fabric: 'Micro Velvet with Dori, Badla & Sequin Craftsmanship',
+    care_instructions: 'Dry clean only. Steam press gently.',
+    status: 'PUBLISHED',
+    is_featured: 1,
+    homepage_placement: 'FEATURED',
+    campaign_label: 'Festive edit',
+    variants: [
+      { id: 'var-lhv-01', sku: 'LH-VEL-01', size: 'Semi-Stitched (Up to 44 Waist)', color: 'Emerald Green & Heritage Gold', color_code: '#0F5F56', cost_price: 7500, selling_price: 13999, sale_price: 11999, quantity: 5, low_stock_threshold: 2 },
+      { id: 'var-lhv-02', sku: 'LH-VEL-02', size: 'Semi-Stitched (Up to 44 Waist)', color: 'Midnight Royal Navy', color_code: '#102A43', cost_price: 7500, selling_price: 13999, sale_price: 11999, quantity: 3, low_stock_threshold: 2 }
+    ],
+    media: [
+      { id: 'med-lhv-01', file_path: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1000&q=80', alt_text: 'Velvet heavy zari embroidered festive lehenga', sort_order: 1, is_primary: 1 }
+    ]
+  },
+
+  // 4. CHILDREN
+  {
+    id: 'prod-chd-pattu-pavadai',
+    name: 'Girls Royal Pattu Pavadai / Silk Lehenga Set',
+    slug: 'girls-royal-pattu-pavadai-silk-lehenga-set',
+    category_id: 'cat-children',
+    description: 'Traditional South Indian Pattu Pavadai for festivals and weddings. Crafted from pure soft silk with gentle cotton inner lining to ensure utmost comfort for delicate skin.',
+    fabric: 'Pure Handloom Silk with Gold Temple Zari Border',
+    care_instructions: 'Dry clean or gentle hand wash.',
+    status: 'PUBLISHED',
+    is_featured: 1,
+    homepage_placement: 'FEATURED',
+    campaign_label: 'Kids Festive',
+    variants: [
+      { id: 'var-chd-01', sku: 'KID-PAT-01', size: 'Age 3-5 Years', color: 'Peacock Blue & Magenta Pink', color_code: '#005F73', cost_price: 1200, selling_price: 2299, sale_price: 1899, quantity: 12, low_stock_threshold: 3 },
+      { id: 'var-chd-02', sku: 'KID-PAT-02', size: 'Age 6-8 Years', color: 'Mustard Gold & Ruby Red', color_code: '#D4AF37', cost_price: 1400, selling_price: 2599, sale_price: 2199, quantity: 10, low_stock_threshold: 3 }
+    ],
+    media: [
+      { id: 'med-chd-01', file_path: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=1000&q=80', alt_text: 'Girls royal Pattu Pavadai silk lehenga', sort_order: 1, is_primary: 1 }
+    ]
+  },
+  {
+    id: 'prod-chd-boys-kurta',
+    name: 'Boys Heritage Jacquard Silk Kurta Dhoti Set',
+    slug: 'boys-heritage-jacquard-silk-kurta-dhoti-set',
+    category_id: 'cat-children',
+    description: 'Classic festive 2-piece set featuring a mandarin collar jacquard silk kurta and pre-stitched readymade silk dhoti with elasticated waistband for effortless celebration wear.',
+    fabric: 'Art Silk Jacquard with Resham Detailing',
+    care_instructions: 'Hand wash cold or gentle dry clean.',
+    status: 'PUBLISHED',
+    is_featured: 1,
+    homepage_placement: 'NEW_ARRIVAL',
+    campaign_label: 'New arrival',
+    variants: [
+      { id: 'var-chb-01', sku: 'KID-BOY-01', size: 'Age 4-6 Years', color: 'Golden Beige & Maroon', color_code: '#D4B996', cost_price: 900, selling_price: 1799, sale_price: 1499, quantity: 15, low_stock_threshold: 3 },
+      { id: 'var-chb-02', sku: 'KID-BOY-02', size: 'Age 7-9 Years', color: 'Royal Blue & Antique Gold', color_code: '#102A43', cost_price: 1050, selling_price: 1999, sale_price: 1699, quantity: 12, low_stock_threshold: 3 }
+    ],
+    media: [
+      { id: 'med-chb-01', file_path: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=1000&q=80', alt_text: 'Boys heritage jacquard silk kurta dhoti set', sort_order: 1, is_primary: 1 }
+    ]
+  }
+];
+
+export function ensureDemoCategoryProducts() {
+  const now = new Date().toISOString();
+  transaction(() => {
+    for (const p of demoCategoryProducts) {
+      const existing = queryOne('SELECT id FROM products WHERE id = ?', [p.id]);
+      if (!existing) {
+        run(`INSERT INTO products (
+          id, name, slug, category_id, description, fabric, care_instructions,
+          status, is_featured, homepage_placement, campaign_label,
+          seo_title, seo_description, canonical_url, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+          p.id, p.name, p.slug, p.category_id, p.description, p.fabric, p.care_instructions,
+          p.status, p.is_featured, p.homepage_placement, p.campaign_label,
+          `${p.name} | India Fashions`, p.description.substring(0, 160),
+          `https://indiafashions.com/product/${p.slug}`, now, now
+        ]);
+
+        for (const v of p.variants) {
+          run(`INSERT OR REPLACE INTO product_variants (
+            id, product_id, sku, size, color, color_code, cost_price, selling_price, sale_price, quantity, low_stock_threshold
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+            v.id, p.id, v.sku, v.size, v.color, v.color_code,
+            v.cost_price, v.selling_price, v.sale_price, v.quantity, v.low_stock_threshold
+          ]);
+        }
+
+        for (let i = 0; i < p.media.length; i++) {
+          const m = p.media[i];
+          run(`INSERT OR REPLACE INTO product_media (
+            id, product_id, file_path, alt_text, sort_order, is_primary, crop_desktop, crop_mobile
+          ) VALUES (?, ?, ?, ?, ?, ?, '4:5', '1:1')`, [
+            m.id, p.id, m.file_path, m.alt_text, m.sort_order, m.is_primary
+          ]);
+        }
+      }
+    }
+  });
+  saveDb();
+}
+
+// Ensure demo products are populated on initialization
+try {
+  ensureDemoCategoryProducts();
+} catch (e) {
+  // DB may still be initializing
+}
+
+// Endpoint to force re-seed demo categories
+router.post('/seed-demo-categories', (req: AuthenticatedRequest, res: Response) => {
+  ensureDemoCategoryProducts();
+  broadcastEvent('product_updated', { action: 'demo_seeded' });
+  res.json({ success: true, message: 'Demo category products seeded successfully' });
 });
 
 export default router;
