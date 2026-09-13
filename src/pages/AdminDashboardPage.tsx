@@ -200,10 +200,14 @@ export const AdminDashboardPage: React.FC = () => {
         setProducts(res.products || []);
       } else if (activeTab === 'media') {
         const res = await apiRequest<{ products: Product[] }>('/products');
-        setProducts(res.products || []);
-        if (!selectedProductForMedia && res.products?.length > 0) {
-          setSelectedProductForMedia(res.products[0]);
-        }
+        const prods = res.products || [];
+        setProducts(prods);
+        setSelectedProductForMedia(prev => {
+          if (prev) {
+            return prods.find(p => p.id === prev.id) || (prods.length > 0 ? prods[0] : null);
+          }
+          return prods.length > 0 ? prods[0] : null;
+        });
       } else if (activeTab === 'inventory') {
         const [invRes, movRes] = await Promise.all([
           apiRequest<{ items: any[] }>('/inventory'),
@@ -543,6 +547,67 @@ export const AdminDashboardPage: React.FC = () => {
       loadData();
     } catch (err: any) {
       showNotification(err.message, 'error');
+    }
+  };
+
+  // Media Management Handlers
+  const handleSetPrimaryMedia = async (mediaId: string) => {
+    if (!selectedProductForMedia) return;
+    try {
+      // 1. Optimistic instant UI update
+      setSelectedProductForMedia(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          media: prev.media.map(m => ({
+            ...m,
+            is_primary: m.id === mediaId
+          }))
+        };
+      });
+
+      // 2. Persist to server
+      await apiRequest(`/media/${mediaId}/set-primary`, { method: 'POST' });
+      showNotification('★ Primary display photo updated successfully!');
+
+      // 3. Sync full product data from server
+      const res = await apiRequest<{ products: Product[] }>('/products');
+      const prods = res.products || [];
+      setProducts(prods);
+      const fresh = prods.find(p => p.id === selectedProductForMedia.id);
+      if (fresh) setSelectedProductForMedia(fresh);
+    } catch (err: any) {
+      showNotification(err.message, 'error');
+      loadData();
+    }
+  };
+
+  const handleDeleteMedia = async (mediaId: string) => {
+    if (!selectedProductForMedia) return;
+    if (!window.confirm('Are you sure you want to delete this photo from the gallery?')) return;
+    try {
+      // 1. Optimistically remove from state
+      setSelectedProductForMedia(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          media: prev.media.filter(m => m.id !== mediaId)
+        };
+      });
+
+      // 2. Call delete endpoint
+      await apiRequest(`/media/${mediaId}`, { method: 'DELETE' });
+      showNotification('Photo deleted from gallery');
+
+      // 3. Sync with server
+      const res = await apiRequest<{ products: Product[] }>('/products');
+      const prods = res.products || [];
+      setProducts(prods);
+      const fresh = prods.find(p => p.id === selectedProductForMedia.id);
+      if (fresh) setSelectedProductForMedia(fresh);
+    } catch (err: any) {
+      showNotification(err.message, 'error');
+      loadData();
     }
   };
 
@@ -1154,21 +1219,51 @@ export const AdminDashboardPage: React.FC = () => {
 
                       <div style={{ padding: '10px', backgroundColor: '#FAF7F2', fontSize: '0.78rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                          <span style={{ fontWeight: 700, color: m.is_primary ? 'var(--color-emerald)' : '#64748B' }}>
+                          <span style={{ fontWeight: 700, color: m.is_primary ? 'var(--color-emerald)' : '#64748B', display: 'flex', alignItems: 'center', gap: '4px' }}>
                             {m.is_primary ? '★ Primary Image' : `Photo #${idx + 1}`}
                           </span>
-                          {!m.is_primary && (
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            {!m.is_primary && (
+                              <button
+                                type="button"
+                                id={`btn-make-primary-${m.id}`}
+                                onClick={() => handleSetPrimaryMedia(m.id)}
+                                style={{
+                                  color: '#ffffff',
+                                  backgroundColor: 'var(--color-gold-dark)',
+                                  border: 'none',
+                                  borderRadius: '4px',
+                                  padding: '4px 9px',
+                                  fontWeight: 700,
+                                  fontSize: '0.72rem',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.2s',
+                                  boxShadow: '0 1px 3px rgba(0,0,0,0.15)'
+                                }}
+                                title="Set as primary store display photo"
+                              >
+                                Make Primary
+                              </button>
+                            )}
                             <button
-                              onClick={async () => {
-                                await apiRequest(`/media/${m.id}/set-primary`, { method: 'POST' });
-                                showNotification('Set as primary image!');
-                                loadData();
+                              type="button"
+                              id={`btn-delete-media-${m.id}`}
+                              onClick={() => handleDeleteMedia(m.id)}
+                              style={{
+                                color: '#DC2626',
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: '3px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                borderRadius: '4px'
                               }}
-                              style={{ color: 'var(--color-gold-dark)', fontWeight: 700, textDecoration: 'underline' }}
+                              title="Delete photo from gallery"
                             >
-                              Make Primary
+                              <Trash2 size={15} />
                             </button>
-                          )}
+                          </div>
                         </div>
 
                         <p style={{ color: '#64748B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>

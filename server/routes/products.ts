@@ -112,8 +112,9 @@ router.get('/', (req: AuthenticatedRequest, res: Response) => {
 
   const mediaByProd = new Map<string, ProductMedia[]>();
   for (const m of allMedia) {
+    const safeMedia = { ...m, is_primary: Boolean(m.is_primary) };
     const list = mediaByProd.get(m.product_id) || [];
-    list.push(m);
+    list.push(safeMedia);
     mediaByProd.set(m.product_id, list);
   }
 
@@ -188,7 +189,7 @@ router.get('/:slugOrId', (req: AuthenticatedRequest, res: Response) => {
   const media = query<ProductMedia>(
     'SELECT * FROM product_media WHERE product_id = ? ORDER BY sort_order ASC',
     [product.id]
-  );
+  ).map(m => ({ ...m, is_primary: Boolean(m.is_primary) }));
 
   // Fetch related products in the same category
   const relatedRows = query<any>(
