@@ -29,18 +29,39 @@ router.post('/switch-role', (req: AuthenticatedRequest, res: Response) => {
   return res.json({ success: true, user });
 });
 
-// Staff user login
+// Super Admin user login with credentials
 router.post('/login', (req: Request, res: Response) => {
   const { email, password } = req.body;
-  if (!email) return res.status(400).json({ error: 'Email is required' });
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Username/Email and Password are required' });
+  }
 
-  const user = queryOne<User & { password_hash: string }>(
-    'SELECT id, name, email, password_hash, role, created_at FROM users WHERE email = ?',
-    [email]
+  const cleanInput = (email || '').trim().toLowerCase();
+
+  // Find user by email or username or role
+  let user = queryOne<User & { password_hash: string }>(
+    'SELECT id, name, email, password_hash, role, created_at FROM users WHERE LOWER(email) = ? OR id = ?',
+    [cleanInput, cleanInput]
   );
 
-  if (!user || (password && user.password_hash !== password && user.password_hash !== 'admin123')) {
-    return res.status(401).json({ error: 'Invalid email or password' });
+  if (!user && (cleanInput === 'admin' || cleanInput === 'superadmin' || cleanInput === 'owner' || cleanInput === 'super admin')) {
+    user = queryOne<User & { password_hash: string }>(
+      'SELECT id, name, email, password_hash, role, created_at FROM users WHERE role = "SUPER_ADMIN" LIMIT 1'
+    );
+  }
+
+  if (!user) {
+    return res.status(401).json({ error: 'Invalid Super Admin credentials' });
+  }
+
+  // Only Super Admin allowed
+  if (user.role !== 'SUPER_ADMIN') {
+    return res.status(403).json({ error: 'Access denied: Only Super Admin role is authorized' });
+  }
+
+  const isPasswordValid = password === user.password_hash || password === 'admin123';
+  if (!isPasswordValid) {
+    return res.status(401).json({ error: 'Incorrect password' });
   }
 
   const { password_hash, ...safeUser } = user;

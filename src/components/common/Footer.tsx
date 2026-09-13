@@ -1,8 +1,12 @@
 import React from 'react';
 import { useStore } from '../../context/StoreContext.js';
-import { MapPin, Phone, Mail, Clock, ShieldCheck, Award, Heart } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, ShieldCheck, Award, Heart, KeyRound } from 'lucide-react';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onOpenAdminLogin?: () => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onOpenAdminLogin }) => {
   const { settings } = useStore();
   const brandName = settings?.brand_name || 'India Fashions';
 
@@ -130,9 +134,26 @@ export const Footer: React.FC = () => {
           }}
         >
           <p>© {new Date().getFullYear()} {brandName}. Handcrafted with heritage pride.</p>
-          <p style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span>Royal Heritage Fashion Platform</span>
-          </p>
+            <button
+              onClick={onOpenAdminLogin}
+              aria-label="Staff Key"
+              title="Staff"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#64748B',
+                opacity: 0.3,
+                cursor: 'pointer',
+                padding: '2px 4px',
+                display: 'inline-flex',
+                alignItems: 'center'
+              }}
+            >
+              <KeyRound size={12} />
+            </button>
+          </div>
         </div>
       </div>
     </footer>

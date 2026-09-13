@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useStore } from '../../context/StoreContext.js';
 import { useAuth } from '../../context/AuthContext.js';
-import { ShoppingBag, Search, MapPin, Truck, Shield, Menu, X, User as UserIcon, ChevronDown, Sparkles } from 'lucide-react';
+import { ShoppingBag, Search, MapPin, Truck, Menu, X, ChevronDown, Sparkles, KeyRound } from 'lucide-react';
 import { UserRole } from '../../../shared/types.js';
 
 interface NavbarProps {
@@ -9,11 +9,18 @@ interface NavbarProps {
   setCurrentView: (view: 'store' | 'admin' | 'tracking') => void;
   onSearchClick?: () => void;
   onSelectCategory?: (slug: string) => void;
+  onOpenAdminLogin?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView, onSearchClick, onSelectCategory }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  currentView,
+  setCurrentView,
+  onSearchClick,
+  onSelectCategory,
+  onOpenAdminLogin
+}) => {
   const { settings, cartCount, setIsCartDrawerOpen, openDeliveryModal } = useStore();
-  const { currentRole, currentUser, switchRole } = useAuth();
+  const { currentRole, currentUser, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
 
@@ -34,56 +41,6 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView, onS
 
   return (
     <header style={{ position: 'sticky', top: 0, zIndex: 50, backgroundColor: 'var(--color-silk-cream)', boxShadow: 'var(--shadow-sm)' }}>
-      {/* Top Demo Bar for Instant Role Switching */}
-      <div
-        style={{
-          backgroundColor: '#1E293B',
-          color: '#F8FAFC',
-          fontSize: '0.75rem',
-          padding: '4px 16px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '8px'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ backgroundColor: 'var(--color-gold)', color: '#000', padding: '1px 6px', borderRadius: '3px', fontWeight: 700 }}>
-            ROLE SIMULATOR
-          </span>
-          <span>Active Role: <strong>{currentRole}</strong> {currentUser ? `(${currentUser.name})` : '(Customer View)'}</span>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ opacity: 0.7 }}>Switch Role:</span>
-          {(['CUSTOMER', 'SUPER_ADMIN', 'ADMIN', 'HEAD_CASHIER', 'INVENTORY_EXECUTIVE', 'POS_CASHIER'] as const).map(role => (
-            <button
-              key={role}
-              onClick={() => {
-                switchRole(role as UserRole | 'CUSTOMER');
-                if (role !== 'CUSTOMER' && currentView === 'store') {
-                  setCurrentView('admin');
-                } else if (role === 'CUSTOMER') {
-                  setCurrentView('store');
-                }
-              }}
-              style={{
-                backgroundColor: currentRole === role ? 'var(--color-emerald)' : 'rgba(255,255,255,0.12)',
-                color: currentRole === role ? '#fff' : '#CBD5E1',
-                padding: '2px 8px',
-                borderRadius: '4px',
-                fontSize: '0.7rem',
-                fontWeight: currentRole === role ? 700 : 400,
-                border: currentRole === role ? '1px solid var(--color-gold)' : 'none'
-              }}
-            >
-              {role.replace('_', ' ')}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Main Boutique Header */}
       <div className="container" style={{ padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         {/* Mobile menu trigger */}
@@ -275,24 +232,35 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView, onS
             </button>
           )}
 
-          {/* Admin Dashboard Entry Button */}
+          {/* Discreet Staff Key Symbol (Unobtrusive for customers) */}
           <button
-            onClick={() => setCurrentView(currentView === 'admin' ? 'store' : 'admin')}
+            onClick={() => {
+              if (currentRole === 'SUPER_ADMIN') {
+                setCurrentView(currentView === 'admin' ? 'store' : 'admin');
+              } else if (onOpenAdminLogin) {
+                onOpenAdminLogin();
+              }
+            }}
+            aria-label="Staff Key"
+            title={currentRole === 'SUPER_ADMIN' ? (currentView === 'admin' ? 'Switch to Storefront' : 'Super Admin Console') : 'Staff Access'}
             style={{
-              padding: '6px 14px',
-              borderRadius: '6px',
-              border: currentView === 'admin' ? '1.5px solid var(--color-gold)' : '1px solid var(--color-border-subtle)',
-              backgroundColor: currentView === 'admin' ? 'var(--color-emerald)' : '#ffffff',
-              color: currentView === 'admin' ? '#ffffff' : 'var(--color-emerald)',
-              fontSize: '0.82rem',
-              fontWeight: 600,
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px'
+              justifyContent: 'center',
+              backgroundColor: currentRole === 'SUPER_ADMIN' ? 'rgba(212, 175, 55, 0.18)' : 'transparent',
+              border: currentRole === 'SUPER_ADMIN' ? '1px solid var(--color-gold)' : 'none',
+              color: currentRole === 'SUPER_ADMIN' ? 'var(--color-emerald)' : '#94A3B8',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              opacity: currentRole === 'SUPER_ADMIN' ? 1 : 0.4
             }}
+            onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+            onMouseLeave={e => (e.currentTarget.style.opacity = currentRole === 'SUPER_ADMIN' ? '1' : '0.4')}
           >
-            <Shield size={14} color={currentView === 'admin' ? 'var(--color-gold)' : 'var(--color-emerald)'} />
-            <span>{currentView === 'admin' ? 'Customer Store' : 'Admin Portal'}</span>
+            <KeyRound size={15} />
           </button>
 
           {/* Cart Trigger */}
@@ -401,12 +369,25 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView, onS
           >
             Track My Order
           </button>
-          <button
-            onClick={() => { setCurrentView(currentView === 'admin' ? 'store' : 'admin'); setMobileMenuOpen(false); }}
-            style={{ textAlign: 'left', fontWeight: 600, padding: '8px 0', color: 'var(--color-maroon)' }}
-          >
-            Operations Admin Dashboard
-          </button>
+          {currentRole === 'SUPER_ADMIN' ? (
+            <button
+              onClick={() => { setCurrentView(currentView === 'admin' ? 'store' : 'admin'); setMobileMenuOpen(false); }}
+              style={{ textAlign: 'left', fontWeight: 600, padding: '8px 0', color: 'var(--color-emerald)', display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <KeyRound size={16} color="var(--color-gold)" />
+              <span>{currentView === 'admin' ? 'Return to Customer Store' : 'Super Admin Console'}</span>
+            </button>
+          ) : (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '10px' }}>
+              <button
+                onClick={() => { setMobileMenuOpen(false); onOpenAdminLogin?.(); }}
+                style={{ background: 'none', border: 'none', color: '#94A3B8', opacity: 0.35, cursor: 'pointer', padding: '6px' }}
+                aria-label="Staff Key"
+              >
+                <KeyRound size={14} />
+              </button>
+            </div>
+          )}
         </div>
       )}
 

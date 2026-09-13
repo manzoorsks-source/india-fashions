@@ -43,7 +43,9 @@ import {
   Calendar,
   PauseCircle,
   PlayCircle,
-  X
+  X,
+  ArrowLeft,
+  LogOut
 } from 'lucide-react';
 
 type AdminTab =
@@ -56,8 +58,12 @@ type AdminTab =
   | 'advance-orders'
   | 'settings';
 
-export const AdminDashboardPage: React.FC = () => {
-  const { currentRole, currentUser, canManageCatalog, canViewCostPrice, canVerifyPayments, canManageInventory, canManageUsers, canManageSettings, canProcessRefunds } = useAuth();
+interface AdminDashboardPageProps {
+  onBackToStore?: () => void;
+}
+
+export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onBackToStore }) => {
+  const { currentRole, currentUser, logout, canManageCatalog, canViewCostPrice, canVerifyPayments, canManageInventory, canManageUsers, canManageSettings, canProcessRefunds } = useAuth();
   const { settings, refreshSettings, refreshTicker } = useStore();
 
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
@@ -866,20 +872,72 @@ export const AdminDashboardPage: React.FC = () => {
 
         {/* Footer Actions */}
         <div style={{ padding: '16px 20px', borderTop: '1px solid #1E293B', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <button
-            onClick={handleOpenAuditLogs}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              color: '#94A3B8',
-              fontSize: '0.78rem',
-              padding: '6px 0'
-            }}
-          >
-            <FileText size={15} />
-            <span>Audit Trail Logs</span>
-          </button>
+          {onBackToStore && (
+            <button
+              onClick={onBackToStore}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                color: 'var(--color-gold-bright)',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                padding: '8px 12px',
+                backgroundColor: 'rgba(212, 175, 55, 0.12)',
+                border: '1px solid var(--color-gold)',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              <ArrowLeft size={15} />
+              <span>Return to Storefront</span>
+            </button>
+          )}
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px' }}>
+            <button
+              onClick={handleOpenAuditLogs}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                color: '#94A3B8',
+                fontSize: '0.78rem',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '4px 0'
+              }}
+            >
+              <FileText size={14} />
+              <span>Audit Trail</span>
+            </button>
+
+            <button
+              onClick={async () => {
+                await logout();
+                if (onBackToStore) onBackToStore();
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                color: '#F87171',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '4px 0'
+              }}
+              title="Sign Out Super Admin"
+            >
+              <LogOut size={14} />
+              <span>Sign Out</span>
+            </button>
+          </div>
         </div>
       </aside>
 

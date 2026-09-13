@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { StoreProvider } from './context/StoreContext.js';
-import { AuthProvider } from './context/AuthContext.js';
+import { AuthProvider, useAuth } from './context/AuthContext.js';
 import { Ticker } from './components/common/Ticker.js';
 import { Navbar } from './components/common/Navbar.js';
 import { Footer } from './components/common/Footer.js';
 import { CartDrawer } from './components/customer/CartDrawer.js';
 import { AdvanceOrderModal } from './components/customer/AdvanceOrderModal.js';
 import { DeliveryCheckModal } from './components/customer/DeliveryCheckModal.js';
+import { AdminLoginModal } from './components/common/AdminLoginModal.js';
 
 import { HomePage } from './pages/HomePage.js';
 import { CategoryPage } from './pages/CategoryPage.js';
@@ -17,11 +18,13 @@ import { AdminDashboardPage } from './pages/AdminDashboardPage.js';
 import { Product } from '../shared/types.js';
 
 export const AppContent: React.FC = () => {
+  const { currentRole } = useAuth();
   const [currentView, setCurrentView] = useState<'store' | 'admin' | 'tracking'>('store');
   const [activePage, setActivePage] = useState<'home' | 'category' | 'pdp' | 'checkout'>('home');
   const [selectedCategorySlug, setSelectedCategorySlug] = useState<string>('all');
   const [selectedProductSlug, setSelectedProductSlug] = useState<string | null>(null);
   const [trackedOrderId, setTrackedOrderId] = useState<string | null>(null);
+  const [isAdminLoginModalOpen, setIsAdminLoginModalOpen] = useState(false);
 
   const handleSelectProduct = (product: Product) => {
     setSelectedProductSlug(product.slug || product.id);
@@ -47,10 +50,14 @@ export const AppContent: React.FC = () => {
       {/* Ticker at the very top of storefront */}
       <Ticker />
 
-      {/* Main Brand Navbar with Role Simulator */}
+      {/* Main Brand Navbar */}
       <Navbar
         currentView={currentView}
         setCurrentView={view => {
+          if (view === 'admin' && currentRole !== 'SUPER_ADMIN') {
+            setIsAdminLoginModalOpen(true);
+            return;
+          }
           setCurrentView(view);
           if (view === 'store') setActivePage('home');
           window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -61,12 +68,47 @@ export const AppContent: React.FC = () => {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         onSelectCategory={handleSelectCategory}
+        onOpenAdminLogin={() => {
+          if (currentRole === 'SUPER_ADMIN') {
+            setCurrentView('admin');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } else {
+            setIsAdminLoginModalOpen(true);
+          }
+        }}
       />
 
       {/* Main Content Area */}
       <div style={{ flex: 1 }}>
         {currentView === 'admin' ? (
-          <AdminDashboardPage />
+          currentRole === 'SUPER_ADMIN' ? (
+            <AdminDashboardPage onBackToStore={() => setCurrentView('store')} />
+          ) : (
+            <div style={{ padding: '80px 20px', textAlign: 'center', backgroundColor: '#F8FAFC', minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ maxWidth: '420px', width: '100%', padding: '36px 28px', backgroundColor: '#ffffff', borderRadius: '12px', boxShadow: '0 12px 30px rgba(0,0,0,0.08)', border: '1.5px solid var(--color-gold)' }}>
+                <h2 style={{ fontSize: '1.3rem', fontFamily: 'var(--font-serif-brand)', color: 'var(--color-emerald-dark)', marginBottom: '8px' }}>
+                  Super Admin Access Required
+                </h2>
+                <p style={{ fontSize: '0.85rem', color: '#64748B', lineHeight: 1.5, marginBottom: '24px' }}>
+                  The Boutique Operations Console is strictly restricted to Super Admin personnel. Please authenticate to proceed.
+                </p>
+                <button
+                  onClick={() => setIsAdminLoginModalOpen(true)}
+                  className="btn-primary"
+                  style={{ width: '100%', padding: '12px', fontSize: '0.9rem', fontWeight: 700 }}
+                >
+                  Super Admin Sign In
+                </button>
+                <button
+                  onClick={() => setCurrentView('store')}
+                  className="btn-outline"
+                  style={{ width: '100%', marginTop: '12px', padding: '10px', fontSize: '0.85rem' }}
+                >
+                  Return to Storefront
+                </button>
+              </div>
+            </div>
+          )
         ) : currentView === 'tracking' ? (
           <OrderTrackingPage
             initialOrderId={trackedOrderId}
@@ -127,7 +169,28 @@ export const AppContent: React.FC = () => {
       <DeliveryCheckModal />
 
       {/* Royal Heritage Boutique Footer (shown in customer mode) */}
-      {currentView !== 'admin' && <Footer />}
+      {currentView !== 'admin' && (
+        <Footer
+          onOpenAdminLogin={() => {
+            if (currentRole === 'SUPER_ADMIN') {
+              setCurrentView('admin');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+              setIsAdminLoginModalOpen(true);
+            }
+          }}
+        />
+      )}
+
+      {/* Super Admin Security Login Modal */}
+      <AdminLoginModal
+        isOpen={isAdminLoginModalOpen}
+        onClose={() => setIsAdminLoginModalOpen(false)}
+        onSuccess={() => {
+          setCurrentView('admin');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
     </div>
   );
 };
