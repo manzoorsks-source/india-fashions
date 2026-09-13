@@ -2171,9 +2171,10 @@ export const AdminDashboardPage: React.FC = () => {
                         id="btn-confirm-restock"
                         onClick={handleReceiveStock}
                         className="btn-primary"
-                        style={{ flex: 1.6 }}
+                        style={{ flex: 1.6, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '0.9rem', fontWeight: 700 }}
                       >
-                        Add to Stock (+{receiveQuantity || 0} units)
+                        <CheckCircle size={18} />
+                        <span>Save Changes</span>
                       </button>
                     </div>
                   </div>
@@ -2187,7 +2188,7 @@ export const AdminDashboardPage: React.FC = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '12px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '4px', color: '#0F172A' }}>
-                      Article / Saree Name *
+                      Article / Product Name *
                     </label>
                     <input
                       type="text"
@@ -2195,7 +2196,7 @@ export const AdminDashboardPage: React.FC = () => {
                       id="input-new-article-name"
                       value={newArticleForm.name}
                       onChange={e => setNewArticleForm({ ...newArticleForm, name: e.target.value })}
-                      placeholder="e.g. Banarasi Katan Silk Antique Brocade Saree"
+                      placeholder="e.g. Surat Embroidered Dress / Banarasi Silk Saree"
                       style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
                     />
                   </div>
@@ -2476,9 +2477,10 @@ export const AdminDashboardPage: React.FC = () => {
                     type="submit"
                     id="btn-submit-new-article"
                     className="btn-primary"
-                    style={{ flex: 1.8 }}
+                    style={{ flex: 1.8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '0.9rem', fontWeight: 700 }}
                   >
-                    ✨ Create Article & Add to Stock (+{newArticleForm.quantity || 1} units)
+                    <CheckCircle size={18} />
+                    <span>Save Changes</span>
                   </button>
                 </div>
               </form>
