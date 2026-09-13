@@ -61,7 +61,7 @@ const CountdownBadge: React.FC<{ endAt: string }> = ({ endAt }) => {
 export const HomePage: React.FC<HomePageProps> = ({ onSelectProduct, onExploreCollection }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const { settings, activeCampaign } = useStore();
+  const { settings, activeCampaign, activeCampaigns, setActiveCampaign } = useStore();
 
   useEffect(() => {
     apiRequest<{ products: Product[] }>('/products')
@@ -79,8 +79,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProduct, onExploreCo
 
   return (
     <div style={{ backgroundColor: '#bce1f0', minHeight: '100vh', transition: 'background-color 0.3s ease' }}>
-      {/* Hero Campaign Section */}
-      <HeroCampaign onExploreClick={onExploreCollection} activeCampaign={activeCampaign} />
+      {/* Hero Campaign Section with Multiple Active Campaign Badges */}
+      <HeroCampaign
+        onExploreClick={onExploreCollection}
+        activeCampaign={activeCampaign}
+        activeCampaigns={activeCampaigns}
+        onSelectCampaign={setActiveCampaign}
+      />
 
       {/* Right-to-Left Product Showcase Carousel */}
       <ProductCarousel
@@ -90,57 +95,116 @@ export const HomePage: React.FC<HomePageProps> = ({ onSelectProduct, onExploreCo
         onSelectProduct={onSelectProduct}
       />
 
-      {/* Festive Campaign Sale Banner with Countdown - Only show when active festive offer is ongoing */}
-      {activeCampaign && activeCampaign.is_active && (
+      {/* Festive Campaign Sale Banners with Countdown - Displays ALL Active Campaigns */}
+      {activeCampaigns && activeCampaigns.length > 0 && (
         <section id="festive-offer" style={{ margin: '40px 0' }}>
           <div className="container">
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <span style={{ fontSize: '0.78rem', color: 'var(--color-gold-dark)', textTransform: 'uppercase', letterSpacing: '0.14em', fontWeight: 800 }}>
+                Auspicious Festive Edits ({activeCampaigns.length} Active Offers)
+              </span>
+              <h2 style={{ fontSize: '2rem', color: 'var(--color-emerald-dark)', fontFamily: 'var(--font-serif-brand)', marginTop: '4px' }}>
+                Exclusive Festive Celebration Offers
+              </h2>
+            </div>
+
             <div
               style={{
-                background: 'linear-gradient(135deg, #6A1B29 0%, #4D121D 100%)',
-                border: '2px solid var(--color-gold)',
-                borderRadius: '12px',
-                padding: '36px 32px',
-                color: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: '24px',
-                boxShadow: '0 8px 24px rgba(106, 27, 41, 0.25)'
+                display: 'grid',
+                gridTemplateColumns: activeCampaigns.length === 1 ? '1fr' : 'repeat(auto-fit, minmax(360px, 1fr))',
+                gap: '24px'
               }}
             >
-              <div style={{ maxWidth: '600px' }}>
-                <span className="badge-festive" style={{ marginBottom: '12px', backgroundColor: 'var(--color-emerald)', borderColor: 'var(--color-gold)' }}>
-                  {activeCampaign.label || 'Exclusive Festive Edit'}
-                </span>
-                <h3 style={{ fontSize: '1.8rem', fontFamily: 'var(--font-serif-brand)', color: 'var(--color-gold-light)', marginBottom: '8px' }}>
-                  {activeCampaign.name}
-                </h3>
-                <p style={{ fontSize: '0.95rem', color: '#F8E9EC', lineHeight: 1.6, fontFamily: 'var(--font-serif-body)' }}>
-                  {activeCampaign.description || 'Select any three handcrafted heirloom sarees for weddings and festive celebrations. Automatically calculated in your bag with server cost protection.'}
-                </p>
-                {activeCampaign.discount_percentage ? (
-                  <div style={{ marginTop: '12px', display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(212, 175, 55, 0.2)', border: '1px solid var(--color-gold)', borderRadius: '6px', padding: '6px 14px', fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-gold-bright)' }}>
-                    <Sparkles size={14} color="var(--color-gold)" />
-                    <span>Special Festive Discount: {activeCampaign.discount_percentage}% OFF across weaves</span>
+              {activeCampaigns.map((camp, idx) => {
+                const isSelected = activeCampaign?.id === camp.id;
+                return (
+                  <div
+                    key={camp.id}
+                    id={`campaign-${camp.id}`}
+                    style={{
+                      background: idx % 2 === 0
+                        ? 'linear-gradient(135deg, #0A433D 0%, #0F5F56 100%)'
+                        : 'linear-gradient(135deg, #6A1B29 0%, #4D121D 100%)',
+                      border: isSelected ? '3px solid var(--color-gold-bright)' : '2px solid var(--color-gold)',
+                      borderRadius: '14px',
+                      padding: '32px 28px',
+                      color: '#ffffff',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      boxShadow: isSelected
+                        ? '0 12px 32px rgba(212, 175, 55, 0.35)'
+                        : (idx % 2 === 0 ? '0 8px 24px rgba(15, 95, 86, 0.25)' : '0 8px 24px rgba(106, 27, 41, 0.25)'),
+                      position: 'relative',
+                      overflow: 'hidden',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                        <span
+                          className="badge-festive"
+                          style={{
+                            backgroundColor: 'rgba(212, 175, 55, 0.2)',
+                            borderColor: 'var(--color-gold)',
+                            color: 'var(--color-gold-bright)',
+                            fontWeight: 800
+                          }}
+                        >
+                          {camp.label || 'Festive Edit'}
+                        </span>
+
+                        {camp.discount_percentage ? (
+                          <span
+                            style={{
+                              backgroundColor: 'var(--color-gold)',
+                              color: 'var(--color-emerald-dark)',
+                              padding: '4px 12px',
+                              borderRadius: '20px',
+                              fontSize: '0.85rem',
+                              fontWeight: 800,
+                              letterSpacing: '0.02em',
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
+                            }}
+                          >
+                            {camp.discount_percentage}% OFF
+                          </span>
+                        ) : null}
+                      </div>
+
+                      <h3 style={{ fontSize: '1.6rem', fontFamily: 'var(--font-serif-brand)', color: '#ffffff', marginBottom: '10px' }}>
+                        {camp.name}
+                      </h3>
+
+                      <p style={{ fontSize: '0.92rem', color: '#F8E9EC', lineHeight: 1.6, fontFamily: 'var(--font-serif-body)', marginBottom: '18px' }}>
+                        {camp.description || 'Celebrate auspicious moments in heirloom Indian weaves with curated discounts and 2+1 festive bundles.'}
+                      </p>
+
+                      {camp.discount_percentage ? (
+                        <div style={{ marginBottom: '18px', display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(212, 175, 55, 0.15)', border: '1px solid var(--color-gold)', borderRadius: '6px', padding: '6px 14px', fontSize: '0.82rem', fontWeight: 700, color: 'var(--color-gold-bright)' }}>
+                          <Sparkles size={14} color="var(--color-gold)" />
+                          <span>Special Festive Savings: {camp.discount_percentage}% OFF across weaves</span>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.15)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {camp.show_countdown && camp.end_at && (
+                        <CountdownBadge endAt={camp.end_at} />
+                      )}
+
+                      <button
+                        onClick={onExploreCollection}
+                        className="btn-gold"
+                        style={{ width: '100%', padding: '12px 24px', fontSize: '0.9rem' }}
+                      >
+                        <span>Shop {camp.name}</span>
+                        <ArrowRight size={16} />
+                      </button>
+                    </div>
                   </div>
-                ) : null}
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {activeCampaign.show_countdown && activeCampaign.end_at && (
-                  <CountdownBadge endAt={activeCampaign.end_at} />
-                )}
-
-                <button
-                  onClick={onExploreCollection}
-                  className="btn-gold"
-                  style={{ width: '100%', padding: '12px 24px' }}
-                >
-                  <span>Shop Festive Sarees</span>
-                  <ArrowRight size={16} />
-                </button>
-              </div>
+                );
+              })}
             </div>
           </div>
         </section>

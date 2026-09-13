@@ -5,10 +5,17 @@ import { SaleCampaign } from '../../../shared/types.js';
 interface HeroCampaignProps {
   onExploreClick: () => void;
   activeCampaign?: SaleCampaign | null;
+  activeCampaigns?: SaleCampaign[];
+  onSelectCampaign?: (campaign: SaleCampaign) => void;
 }
 
-export const HeroCampaign: React.FC<HeroCampaignProps> = ({ onExploreClick, activeCampaign }) => {
-  const isOfferActive = Boolean(activeCampaign && activeCampaign.is_active);
+export const HeroCampaign: React.FC<HeroCampaignProps> = ({
+  onExploreClick,
+  activeCampaign,
+  activeCampaigns = [],
+  onSelectCampaign
+}) => {
+  const isOfferActive = Boolean(activeCampaign && activeCampaign.is_active) || activeCampaigns.length > 0;
 
   return (
     <section
@@ -48,30 +55,68 @@ export const HeroCampaign: React.FC<HeroCampaignProps> = ({ onExploreClick, acti
       >
         {/* Left Headline & Campaign Copy */}
         <div style={{ maxWidth: '580px' }}>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              backgroundColor: 'rgba(212, 175, 55, 0.15)',
-              border: '1px solid var(--color-gold)',
-              borderRadius: '999px',
-              padding: '4px 12px',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              color: 'var(--color-gold-light)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              marginBottom: '20px'
-            }}
-          >
-            <Sparkles size={13} color="var(--color-gold)" />
-            {isOfferActive ? (
-              <span>{activeCampaign?.label || 'Festive Edit'} • {activeCampaign?.name} {activeCampaign?.discount_percentage ? `(${activeCampaign.discount_percentage}% OFF)` : ''}</span>
-            ) : (
-              <span>Heritage Handlooms • Master Weaves</span>
-            )}
-          </div>
+          {activeCampaigns && activeCampaigns.length > 1 ? (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '20px' }}>
+              {activeCampaigns.map(camp => {
+                const isSelected = activeCampaign?.id === camp.id;
+                return (
+                  <button
+                    key={camp.id}
+                    type="button"
+                    onClick={() => {
+                      onSelectCampaign?.(camp);
+                      const el = document.getElementById(`campaign-${camp.id}`) || document.getElementById('festive-offer');
+                      el?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      backgroundColor: isSelected ? 'var(--color-gold)' : 'rgba(212, 175, 55, 0.2)',
+                      border: '1px solid var(--color-gold)',
+                      borderRadius: '999px',
+                      padding: '5px 14px',
+                      fontSize: '0.78rem',
+                      fontWeight: 800,
+                      color: isSelected ? 'var(--color-emerald-dark)' : 'var(--color-gold-bright)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      boxShadow: isSelected ? '0 2px 10px rgba(212, 175, 55, 0.4)' : 'none'
+                    }}
+                    title={`Click to view ${camp.name}`}
+                  >
+                    <Sparkles size={13} color={isSelected ? 'var(--color-emerald-dark)' : 'var(--color-gold)'} />
+                    <span>{camp.name} ({camp.discount_percentage}% OFF)</span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                backgroundColor: 'rgba(212, 175, 55, 0.15)',
+                border: '1px solid var(--color-gold)',
+                borderRadius: '999px',
+                padding: '4px 12px',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                color: 'var(--color-gold-light)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                marginBottom: '20px'
+              }}
+            >
+              <Sparkles size={13} color="var(--color-gold)" />
+              {isOfferActive ? (
+                <span>{activeCampaign?.label || 'Festive Edit'} • {activeCampaign?.name} {activeCampaign?.discount_percentage ? `(${activeCampaign.discount_percentage}% OFF)` : ''}</span>
+              ) : (
+                <span>Heritage Handlooms • Master Weaves</span>
+              )}
+            </div>
+          )}
 
           <h2
             style={{
@@ -118,7 +163,7 @@ export const HeroCampaign: React.FC<HeroCampaignProps> = ({ onExploreClick, acti
                   padding: '12px 24px'
                 }}
               >
-                View Festive Offer ({activeCampaign?.discount_percentage}% OFF)
+                View Festive Offers ({activeCampaigns.length > 1 ? `${activeCampaigns.length} Active Sales` : `${activeCampaign?.discount_percentage}% OFF`})
               </a>
             ) : (
               <a

@@ -6,6 +6,8 @@ interface StoreContextType {
   settings: StoreSettings | null;
   tickerMessages: TickerMessage[];
   activeCampaign: SaleCampaign | null;
+  activeCampaigns: SaleCampaign[];
+  setActiveCampaign: (c: SaleCampaign | null) => void;
   cart: CartItem[];
   addToCart: (product: Product, variant: ProductVariant, quantity?: number) => void;
   updateCartQuantity: (variantId: string, quantity: number) => void;
@@ -60,6 +62,7 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [settings, setSettings] = useState<StoreSettings>(defaultSettings);
   const [tickerMessages, setTickerMessages] = useState<TickerMessage[]>([]);
+  const [activeCampaigns, setActiveCampaigns] = useState<SaleCampaign[]>([]);
   const [activeCampaign, setActiveCampaign] = useState<SaleCampaign | null>(null);
   const [cart, setCart] = useState<CartItem[]>(() => {
     try {
@@ -112,12 +115,20 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     try {
       const data = await apiRequest<{ campaigns: SaleCampaign[] }>('/sales/active');
       if (data?.campaigns && data.campaigns.length > 0) {
-        setActiveCampaign(data.campaigns[0]);
+        setActiveCampaigns(data.campaigns);
+        setActiveCampaign(prev => {
+          if (prev && data.campaigns.some(c => c.id === prev.id)) {
+            return data.campaigns.find(c => c.id === prev.id) || data.campaigns[0];
+          }
+          return data.campaigns[0];
+        });
       } else {
+        setActiveCampaigns([]);
         setActiveCampaign(null);
       }
     } catch (err) {
       console.error('Failed to load active campaign', err);
+      setActiveCampaigns([]);
       setActiveCampaign(null);
     }
   };
@@ -266,6 +277,8 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         settings,
         tickerMessages,
         activeCampaign,
+        activeCampaigns,
+        setActiveCampaign,
         cart,
         addToCart,
         updateCartQuantity,

@@ -11,7 +11,7 @@ const router = Router();
 router.get('/active', (req: AuthenticatedRequest, res: Response) => {
   const now = new Date().toISOString();
   const campaigns = query<SaleCampaign>(
-    'SELECT * FROM sale_campaigns WHERE is_active = 1 AND start_at <= ? AND end_at >= ?',
+    'SELECT * FROM sale_campaigns WHERE is_active = 1 AND start_at <= ? AND end_at >= ? ORDER BY discount_percentage DESC, start_at DESC',
     [now, now]
   );
   res.json({ campaigns });
