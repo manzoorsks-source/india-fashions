@@ -196,6 +196,46 @@ export const HomePage: React.FC<HomePageProps> = ({
     || products.find(p => p.is_featured)
     || products[0];
 
+  const categoryDefs = [
+    { slug: 'sarees', name: 'Heirloom Sarees', icon: '🥻' },
+    { slug: 'punjabi-dresses', name: 'Punjabi Dresses', icon: '👗' },
+    { slug: 'kurti', name: 'Designer Kurtis', icon: '🌸' },
+    { slug: 'lehenga', name: 'Royal Lehengas', icon: '💃' },
+    { slug: 'children', name: 'Children Festive', icon: '👧' }
+  ];
+
+  const categorySlides = categoryDefs.map(cat => {
+    const catProds = products.filter(p => {
+      const matchesCat =
+        p.category_slug === cat.slug ||
+        p.category_id === `cat-${cat.slug}` ||
+        (cat.slug === 'punjabi-dresses' && p.category_name?.toLowerCase().includes('punjabi')) ||
+        (cat.slug === 'sarees' && p.category_name?.toLowerCase().includes('saree')) ||
+        (cat.slug === 'kurti' && (p.category_name?.toLowerCase().includes('kurti') || p.category_id === 'cat-kurti')) ||
+        (cat.slug === 'lehenga' && (p.category_name?.toLowerCase().includes('lehenga') || p.category_id === 'cat-lehenga')) ||
+        (cat.slug === 'children' && (p.category_name?.toLowerCase().includes('child') || p.category_id === 'cat-children'));
+
+      if (!matchesCat) return false;
+
+      const photo = p.media?.find(m => m.is_primary)?.file_path || p.media?.[0]?.file_path;
+      const isValidPhoto = photo && (photo.startsWith('http') || photo.startsWith('/uploads'));
+      return Boolean(isValidPhoto);
+    });
+
+    const heroProd =
+      catProds.find(p => p.homepage_placement === 'HERO') ||
+      catProds.find(p => p.is_featured) ||
+      catProds[0] ||
+      null;
+
+    return {
+      slug: cat.slug,
+      name: cat.name,
+      icon: cat.icon,
+      product: heroProd
+    };
+  }).filter((slide): slide is { slug: string; name: string; icon: string; product: Product } => slide.product !== null);
+
   return (
     <div style={{ backgroundColor: '#bce1f0', minHeight: '100vh', transition: 'background-color 0.3s ease' }}>
       {/* 1. Hero Campaign Banner Section */}
@@ -205,6 +245,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         activeCampaigns={activeCampaigns}
         onSelectCampaign={setActiveCampaign}
         heroProduct={heroProduct}
+        categorySlides={categorySlides}
         onSelectProduct={onSelectProduct}
       />
 

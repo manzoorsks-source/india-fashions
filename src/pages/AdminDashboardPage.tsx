@@ -1183,7 +1183,19 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onBackTo
                             />
                             <div>
                               <strong style={{ color: '#0F172A', display: 'block' }}>{p.name}</strong>
-                              <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>{p.slug}</span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px', flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>{p.slug}</span>
+                                {p.homepage_placement === 'HERO' && (
+                                  <span style={{ fontSize: '0.68rem', backgroundColor: '#FEF3C7', color: '#B45309', border: '1px solid #FCD34D', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                                    ⭐ HERO Slide
+                                  </span>
+                                )}
+                                {p.is_featured ? (
+                                  <span style={{ fontSize: '0.68rem', backgroundColor: '#E0F2FE', color: '#0369A1', padding: '1px 5px', borderRadius: '4px', fontWeight: 600 }}>
+                                    Featured
+                                  </span>
+                                ) : null}
+                              </div>
                             </div>
                           </div>
                         </td>
@@ -3055,11 +3067,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onBackTo
                       onChange={e => setProductFormData({ ...productFormData, homepage_placement: e.target.value as any })}
                       style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.85rem', backgroundColor: '#fff' }}
                     >
+                      <option value="HERO">⭐ HERO (Top Banner Category Slide)</option>
                       <option value="FEATURED">FEATURED (Curated Edit)</option>
-                      <option value="HERO">HERO (Main Banner Showcase)</option>
                       <option value="NEW_ARRIVAL">NEW_ARRIVAL (Latest Weaves)</option>
                       <option value="NONE">NONE (Standard Catalog)</option>
                     </select>
+                    <p style={{ fontSize: '0.72rem', color: '#64748B', marginTop: '4px', marginBottom: 0 }}>
+                      ⭐ Products set to <strong>HERO</strong> automatically slide on the top banner for their category.
+                    </p>
                   </div>
 
                   <div>
