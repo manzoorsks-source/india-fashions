@@ -85,7 +85,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productSlu
             }}
           >
             <ArrowLeft size={16} />
-            <span>Back to Sarees</span>
+            <span>Back to Collection</span>
           </button>
 
           <button
@@ -103,7 +103,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productSlu
             }}
           >
             <Share2 size={15} />
-            <span>{copied ? 'Link Copied!' : 'Share Saree'}</span>
+            <span>{copied ? 'Link Copied!' : 'Share Product'}</span>
           </button>
         </div>
 
@@ -347,7 +347,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productSlu
                   }}
                 >
                   <ShoppingBag size={18} color="var(--color-gold)" />
-                  <span>Add Saree to Bag</span>
+                  <span>Add to Bag</span>
                 </button>
               )}
             </div>
@@ -355,27 +355,31 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productSlu
             {/* Fabric & Care Instructions Accordion / Specs */}
             <div style={{ borderTop: '1px solid var(--color-border-subtle)', paddingTop: '20px' }}>
               <h4 style={{ fontSize: '0.92rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
-                Weave Specifications & Fabric Care
+                Product Specifications & Fabric Care
               </h4>
               <ul style={{ listStyle: 'none', padding: 0, fontSize: '0.85rem', color: 'var(--color-charcoal-muted)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <li><strong>Fabric:</strong> {product.fabric}</li>
                 <li><strong>Care Instructions:</strong> {product.care_instructions}</li>
-                <li><strong>Saree Length:</strong> 6.3 meters (includes unstitched running blouse piece)</li>
-                <li><strong>Artisan Origin:</strong> Handcrafted under the Silk Mark Certification scheme</li>
+                {product.category_id === 'cat-sarees' ? (
+                  <li><strong>Saree Length:</strong> 6.3 meters (includes unstitched running blouse piece)</li>
+                ) : (
+                  <li><strong>Size / Fit:</strong> {selectedVariant.size || 'Standard Fit'}</li>
+                )}
+                <li><strong>Artisan Quality:</strong> Guaranteed authentic handloom & craftsmanship</li>
               </ul>
             </div>
           </div>
         </div>
 
-        {/* Related Products Carousel (keeps unavailable product visible without hiding it) */}
+        {/* Related Products Section */}
         {relatedProducts.length > 0 && (
           <div style={{ marginTop: '80px', borderTop: '1px solid var(--color-border-subtle)', paddingTop: '40px' }}>
             <div style={{ marginBottom: '24px' }}>
               <p style={{ fontSize: '0.78rem', color: 'var(--color-gold-dark)', textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 700 }}>
-                Complementary Looms
+                You May Also Like
               </p>
               <h2 style={{ fontSize: '1.8rem', color: 'var(--color-emerald-dark)', fontFamily: 'var(--font-serif-brand)' }}>
-                Related Handcrafted Weaves
+                Related Products & Collections
               </h2>
             </div>
 
