@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <title>India Fashions — Admin Dashboard Complete User Manual & Guide</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    @page {
+      size: A4;
+      margin: 14mm 12mm 16mm 12mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #0F172A;
+      background-color: #FFFFFF;
+      line-height: 1.5;
+      font-size: 13px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .cover-header {
+      background: linear-gradient(135deg, #0A433D 0%, #0F5F56 60%, #16796E 100%);
+      color: #ffffff;
+      padding: 24px 28px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      border: 2px solid #D4AF37;
+      box-shadow: 0 4px 14px rgba(15, 95, 86, 0.2);
+    }
+
+    .cover-title {
+      font-family: 'Cinzel', serif;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      color: #FAF7F2;
+      margin-bottom: 6px;
+    }
+
+    .cover-subtitle {
+      font-size: 13px;
+      color: #E0ECEE;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .meta-badge-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .meta-badge {
+      background-color: rgba(212, 175, 55, 0.2);
+      border: 1px solid #D4AF37;
+      color: #FFF2C5;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 17px;
+      color: #0F5F56;
+      border-bottom: 2px solid #E2E8F0;
+      padding-bottom: 5px;
+      margin: 18px 0 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      font-size: 11.5px;
+    }
+
+    .summary-table th {
+      background-color: #0F5F56;
+      color: #ffffff;
+      text-align: left;
+      padding: 8px 10px;
+      font-weight: 700;
+      border: 1px solid #0F5F56;
+    }
+
+    .summary-table td {
+      padding: 8px 10px;
+      border: 1px solid #CBD5E1;
+      vertical-align: top;
+    }
+
+    .summary-table tr:nth-child(even) {
+      background-color: #F8FAFC;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #CBD5E1;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      page-break-inside: avoid;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #0F172A;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .badge-icon {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .badge-core { background: #DCFCE7; color: #166534; }
+    .badge-sales { background: #FEF3C7; color: #92400E; }
+    .badge-admin { background: #EDE9FE; color: #5B21B6; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .box-info {
+      background-color: #FAF7F2;
+      border-left: 3px solid #D4AF37;
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-size: 11.5px;
+    }
+
+    .box-steps {
+      background-color: #F0FDF4;
+      border-left: 3px solid #16A34A;
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-size: 11.5px;
+    }
+
+    .box-warning {
+      background-color: #FFF1F2;
+      border-left: 3px solid #E11D48;
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-size: 11.5px;
+      margin-top: 8px;
+    }
+
+    ol, ul {
+      margin-left: 18px;
+      margin-top: 4px;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    .highlight {
+      font-weight: 700;
+      color: #0F5F56;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 10px;
+      color: #64748B;
+      margin-top: 24px;
+      border-top: 1px solid #E2E8F0;
+      padding-top: 8px;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- COVER HEADER -->
+  <div class="cover-header">
+    <div class="cover-title">INDIA FASHIONS — BOUTIQUE OPS</div>
+    <div class="cover-subtitle">Admin Dashboard Complete Operational Guide & User Manual</div>
+    <div class="meta-badge-row">
+      <span class="meta-badge">📖 Hindi & English User Manual</span>
+      <span class="meta-badge">🛡️ Role-Based Access Control</span>
+      <span class="meta-badge">✨ Live Ready 2026</span>
+    </div>
+  </div>
+
+  <p style="font-size: 12px; color: #475569; margin-bottom: 16px;">
+    Yeh guide aapko Boutique Ops Dashboard ke har ek option ka maksad (purpose), usme kya kaam karna hai, aur step-by-step kaise operate karna hai, aasan shabdon me samjhata hai.
+  </p>
+
+  <!-- QUICK CHEAT SHEET TABLE -->
+  <h2>📋 Quick Overview — Kis Option Me Kya Kaam Hota Hai?</h2>
+  <table class="summary-table">
+    <thead>
+      <tr>
+        <th style="width: 25%;">Dashboard Option</th>
+        <th style="width: 35%;">Asal Maksad (Purpose)</th>
+        <th style="width: 40%;">Aapko Kya Kaam Karna Hai?</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>1. Overview & Metrics</strong></td>
+        <td>Dukaan ka live report & summary dekhna.</td>
+        <td>Total revenue, pending orders, low stock items, aur recent activities ka bird's-eye view monitor karein.</td>
+      </tr>
+      <tr>
+        <td><strong>2. Product Catalog</strong></td>
+        <td>Naye sarees/suits ko website par launch karna.</td>
+        <td>Naya design banayein, Price set karein, Fabric & care likhein, draft ya publish status set karein.</td>
+      </tr>
+      <tr>
+        <td><strong>3. Media & Gallery</strong></td>
+        <td>Saree ki photos upload & arrange karna.</td>
+        <td>Photos upload karein, kaunsi photo main thumbnail (Primary) hogi wo select karein.</td>
+      </tr>
+      <tr>
+        <td><strong>4. Inventory Matrix</strong></td>
+        <td>Stock count manage karna aur restock intake lena.</td>
+        <td>Master weaver se naya maal aane par <strong>+ Add Stock</strong> karein (1 to &infin;), ya direct naya SKU add karein.</td>
+      </tr>
+      <tr>
+        <td><strong>5. Sales & Campaigns</strong></td>
+        <td>Festive sale offers & discounts chalana.</td>
+        <td>Vinayaka Chavithi, Diwali, Eid offers create karein, From/To dates schedule karein, live countdown timer on karein.</td>
+      </tr>
+      <tr>
+        <td><strong>6. Orders & Payments</strong></td>
+        <td>Customer ke orders pack & dispatch karna.</td>
+        <td>Customer address dekhein, IMPS/NEFT bank payment UTR confirm karke order dispatch/deliver mark karein.</td>
+      </tr>
+      <tr>
+        <td><strong>7. Advance Orders</strong></td>
+        <td>Excusive loom reservations book karna.</td>
+        <td>Jin customers ne advance token dekar exclusive saree book ki hai, stock aane par unhe saree allocate karein.</td>
+      </tr>
+      <tr>
+        <td><strong>8. Settings & Tickers</strong><br><small style="color: #64748B;">(Super Admin Only)</small></td>
+        <td>Brand name, address & announcements badalna.</td>
+        <td>Dukaan ka naam, address, delivery radius (km), 2+1 bundle engine toggle, aur chalne wala announcement ticker manage karein.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 1: OVERVIEW & METRICS -->
+  <div class="card">
+    <div class="card-title">
+      <span>1. Overview & Metrics</span>
+      <span class="badge-icon badge-core">Store Health</span>
+    </div>
+    <div class="grid-2">
+      <div class="box-info">
+        <strong>💡 Kab Use Karein?</strong>
+        <p>Din shuru hote hi dukaan ki overall performance dekhne ke liye.</p>
+        <ul>
+          <li>Aaj ki total sales aur earnings (₹).</li>
+          <li>Kitne orders pending hain jinhe pack karna hai.</li>
+          <li>Kaunsi saree ka stock khatam hone wala hai.</li>
+        </ul>
+      </div>
+      <div class="box-steps">
+        <strong>🛠️ Step-by-Step Kaam:</strong>
+        <ol>
+          <li>Top metric cards par ek nazar daalein (Total Revenue, Pending Orders, Low Stock Alerts).</li>
+          <li>Agar koi low-stock alert dikhe, direct Inventory Matrix me jakar restock karein.</li>
+          <li>Agar pending orders dikhein, Orders tab me jakar payment check karein.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: PRODUCT CATALOG -->
+  <div class="card">
+    <div class="card-title">
+      <span>2. Product Catalog</span>
+      <span class="badge-icon badge-core">Catalog Management</span>
+    </div>
+    <div class="grid-2">
+      <div class="box-info">
+        <strong>💡 Kab Use Karein?</strong>
+        <p>Jab aapko store me naya saree weave ya dress customer ke dekhne ke liye add/edit karna ho.</p>
+        <ul>
+          <li>Naya Saree design publish karna.</li>
+          <li>Selling price ya Sale discount price edit karna.</li>
+          <li>Homepage placement set karna (Featured, Hero, New Arrival).</li>
+        </ul>
+      </div>
+      <div class="box-steps">
+        <strong>🛠️ Step-by-Step Kaam:</strong>
+        <ol>
+          <li><strong>+ Add New Product</strong> button par click karein.</li>
+          <li>Saree Name, Category (Sarees, Punjabi, etc.) aur Fabric type likhein.</li>
+          <li>Cost Price (kharid rate) aur Selling Price (bikri rate) dalein. <em>(Safeguard: Selling price kharid rate se kam nahi ho sakti).</em></li>
+          <li>Save karein — Saree turant website par live dikhne lagegi!</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- SECTION 3: MEDIA & GALLERY -->
+  <div class="card">
+    <div class="card-title">
+      <span>3. Media & Gallery</span>
+      <span class="badge-icon badge-core">Visual Assets</span>
+    </div>
+    <div class="grid-2">
+      <div class="box-info">
+        <strong>💡 Kab Use Karein?</strong>
+        <p>Saree ki high-resolution photos upload aur manage karne ke liye.</p>
+        <ul>
+          <li>Saree ke multiple angles (Pallu, Bootee, Model drape) upload karna.</li>
+          <li>Kaunsi photo pehle dikhegi wo <strong>"Primary Image"</strong> select karna.</li>
+        </ul>
+      </div>
+      <div class="box-steps">
+        <strong>🛠️ Step-by-Step Kaam:</strong>
+        <ol>
+          <li>Left list me se saree select karein.</li>
+          <li>Image URL ya photo file upload karein.</li>
+          <li>Jis photo ko main banner banana ho, uspar <strong>"Make Primary"</strong> click karein.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: INVENTORY MATRIX -->
+  <div class="card" style="border: 1.5px solid #0F5F56;">
+    <div class="card-title">
+      <span style="color: #0F5F56;">4. Inventory Matrix (Stock Management)</span>
+      <span class="badge-icon badge-core" style="background: #0F5F56; color: #ffffff;">Very Important</span>
+    </div>
+    <div class="grid-2">
+      <div class="box-info">
+        <strong>💡 Kab Use Karein?</strong>
+        <p>Jab master loom ya weaver se naya stock godown/store me aata hai.</p>
+        <ul>
+          <li><strong>Tab 1 (Restock Existing Article):</strong> Puraane design ka stock badhana.</li>
+          <li><strong>Tab 2 (+ Add New Article / SKU):</strong> Bina catalog gaye seedha nayi saree aur uska initial stock add karna.</li>
+        </ul>
+      </div>
+      <div class="box-steps">
+        <strong>🛠️ Step-by-Step Kaam:</strong>
+        <ol>
+          <li>Top par <strong>"+ Add Inventory / Stock"</strong> button dabayein.</li>
+          <li><strong>Restock Existing:</strong> SKU chuniye &rarr; Units dalein (1 to &infin;, koi limit nahi) &rarr; "Add to Stock" dabayein.</li>
+          <li><strong>Add New Article:</strong> Tab 2 dabayein &rarr; Name, SKU, Fabric, Rate, aur Stock Quantity bhariye &rarr; Save karein.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="box-warning">
+      <strong>⚠️ Safeguard Note:</strong> Negative inventory add karna strictly allowed nahi hai. Quantity hamesha 1 ya usse zyada (1 to &infin;) honi chahiye. Minus signs automatically block hain.
+    </div>
+  </div>
+
+  <!-- SECTION 5: SALES & CAMPAIGNS -->
+  <div class="card" style="border: 1.5px solid #D4AF37;">
+    <div class="card-title">
+      <span style="color: #92400E;">5. Sales & Campaigns (Festive Offers)</span>
+      <span class="badge-icon badge-sales">Festive Engine</span>
+    </div>
+    <div class="grid-2">
+      <div class="box-info">
+        <strong>💡 Kab Use Karein?</strong>
+        <p>Teej, Vinayaka Chavithi, Diwali, Eid, ya Wedding Season par offers chalane ke liye.</p>
+        <ul>
+          <li>Discount percentage set karna (e.g. 15% ya 25% OFF).</li>
+          <li>Offer kab shuru hoga (From Date) aur kab band hoga (To Date).</li>
+          <li>Home page par live countdown timer ticker lagana.</li>
+        </ul>
+      </div>
+      <div class="box-steps">
+        <strong>🛠️ Step-by-Step Kaam:</strong>
+        <ol>
+          <li><strong>+ New Campaign</strong> click karein.</li>
+          <li>Campaign Name (e.g. "Diwali Dhamaka") aur Discount % dalein.</li>
+          <li><strong>Start Date & End Date</strong> select karein.</li>
+          <li>Save karein &rarr; Home page ke Hero banner aur Festive section me automatically timer ke sath dono offers live show honge!</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6: ORDERS & PAYMENTS -->
+  <div class="card">
+    <div class="card-title">
+      <span>6. Orders & Payments</span>
+      <span class="badge-icon badge-core">Order Fulfillment</span>
+    </div>
+    <div class="grid-2">
+      <div class="box-info">
+        <strong>💡 Kab Use Karein?</strong>
+        <p>Jab customer website par shopping karke order place karta hai.</p>
+        <ul>
+          <li>Customer ka delivery address aur phone number dekhna.</li>
+          <li>IMPS/NEFT direct bank transfer wale orders ka UTR number check karke verify karna.</li>
+          <li>Order status ko "CONFIRMED" aur "DISPATCHED" mark karna.</li>
+        </ul>
+      </div>
+      <div class="box-steps">
+        <strong>🛠️ Step-by-Step Kaam:</strong>
+        <ol>
+          <li>List me order dekhein. Agar payment IMPS hai toh UTR verify karke <strong>"Verify Payment"</strong> dabayein.</li>
+          <li>Saree pack karke courier/delivery boy ko dein aur <strong>"Mark Dispatched"</strong> click karein.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- SECTION 7: ADVANCE ORDERS -->
+  <div class="card">
+    <div class="card-title">
+      <span>7. Advance Orders (Loom Pre-Bookings)</span>
+      <span class="badge-icon badge-sales">Master Weaves</span>
+    </div>
+    <div class="grid-2">
+      <div class="box-info">
+        <strong>💡 Kab Use Karein?</strong>
+        <p>Jab koi customer bohot mehengi ya exclusive bridal saree banne se pehle token dekar reserve karta hai.</p>
+        <ul>
+          <li>Customer ne kitna token advance diya hai wo record dekhna.</li>
+          <li>Kanchipuram ya Varanasi loom se saree tayar ho kar aane par customer ko notify karna.</li>
+        </ul>
+      </div>
+      <div class="box-steps">
+        <strong>🛠️ Step-by-Step Kaam:</strong>
+        <ol>
+          <li>Customer ki request check karein.</li>
+          <li>Jaise hi saree tayar hokar store me aaye, <strong>"Allocate Stock"</strong> button dabayein.</li>
+          <li>Customer ko inform karein ki unka exclusive piece ready hai!</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 8: SETTINGS & TICKERS -->
+  <div class="card" style="border: 1.5px solid #5B21B6;">
+    <div class="card-title">
+      <span style="color: #5B21B6;">8. Settings & Tickers (Super Admin Only)</span>
+      <span class="badge-icon badge-admin">Master Controls</span>
+    </div>
+    <div class="grid-2">
+      <div class="box-info">
+        <strong>💡 Kab Use Karein?</strong>
+        <p>Store ki core branding, address ya announcement ticker badalne ke liye (bina code change kiye!).</p>
+        <ul>
+          <li><strong>Brand Name:</strong> Naam badalte hi poori website ka naam ek second me badal jata hai.</li>
+          <li><strong>Boutique Address & Delivery Radius:</strong> Kitne km tak home delivery deni hai (e.g. 12 km).</li>
+          <li><strong>2+1 Festive Bundle Engine:</strong> "Buy 2 Get 1 Free" offer on ya off karna.</li>
+          <li><strong>Homepage Ticker:</strong> Website ke top par chalne wali red/gold announcement patti.</li>
+        </ul>
+      </div>
+      <div class="box-steps">
+        <strong>🛠️ Step-by-Step Kaam:</strong>
+        <ol>
+          <li>Brand Name, Tagline ya Address text box me edit karein.</li>
+          <li><strong>"Save Brand Settings"</strong> dabayein &rarr; Instant website update.</li>
+          <li>Nayi headline chalane ke liye <strong>"Add Message"</strong> dabayein &rarr; Top ticker me live scroll hone lagega.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROLES REFERENCE SUMMARY -->
+  <div class="card" style="background-color: #F8FAFC; border: 1px dashed #94A3B8;">
+    <div class="card-title" style="font-size: 13px;">
+      <span>🔐 Who Can Do What? (Staff Roles & Permissions)</span>
+    </div>
+    <ul style="font-size: 11px; color: #475569; line-height: 1.6;">
+      <li><strong>Super Admin (Rajesh Mehra - Owner):</strong> Full control over everything (Cost prices, Settings, Staff Users, P&L).</li>
+      <li><strong>Admin / Store Manager (Ananya Sharma):</strong> Product Catalog, Media photos, Sales Campaigns, Inventory Matrix.</li>
+      <li><strong>Inventory Executive:</strong> Stock Receive receipts, Loom intake (+ Add Stock), Damaged goods adjustment.</li>
+      <li><strong>Head Cashier:</strong> Order payments, Bank UTR verification, Dispatch approvals.</li>
+    </ul>
+  </div>
+
+  <div class="footer-note">
+    India Fashions Boutique Ops • Handcrafted Heritage & Festive Weaves • Generated on 14 September 2026
+  </div>
+
+</body>
+</html>
