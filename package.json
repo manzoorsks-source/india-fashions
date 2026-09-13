@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev:server": "tsx watch server/index.ts",
-    "dev:client": "vite",
+    "dev:client": "vite --host 0.0.0.0",
     "dev": "concurrently -k -n \"SERVER,CLIENT\" -c \"magenta,cyan\" \"npm run dev:server\" \"npm run dev:client\"",
     "build": "tsc && vite build",
     "preview": "vite preview",

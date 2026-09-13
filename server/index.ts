@@ -71,7 +71,7 @@ async function start() {
   await getDb();
   console.log('Database initialized successfully.');
 
-  app.listen(PORT, () => {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`India Fashions Server running on http://localhost:${PORT}`);
   });
 }
