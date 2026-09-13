@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Production build
+dist/
+build/
+
+# SQLite journal & temp files
+*.sqlite-journal
+
+# Logs & environment
+*.log
+.env
+.env.local
+
+# OS Files
+.DS_Store
+Thumbs.db
