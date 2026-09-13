@@ -48,7 +48,7 @@ export const Ticker: React.FC = () => {
           display: 'flex',
           alignItems: 'center',
           width: 'max-content',
-          animation: 'ticker-scroll-rtl 42s linear infinite',
+          animation: 'ticker-scroll-rtl 80s linear infinite',
           animationPlayState: isPaused ? 'paused' : 'running',
           willChange: 'transform'
         }}
