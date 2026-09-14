@@ -77,7 +77,10 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   res.status(500).json({ error: err.message || 'Internal server error' });
 });
 
-// Initialize database and start listening
+// Export app for serverless platforms (e.g., Vercel)
+export default app;
+
+// Initialize database and start listening for standalone local server
 async function start() {
   await getDb();
   console.log('Database initialized successfully.');
@@ -87,7 +90,9 @@ async function start() {
   });
 }
 
-start().catch(err => {
-  console.error('Server startup failed:', err);
-  process.exit(1);
-});
+if (!process.env.VERCEL) {
+  start().catch(err => {
+    console.error('Server startup failed:', err);
+    process.exit(1);
+  });
+}
