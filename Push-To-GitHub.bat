@@ -1,55 +1,69 @@
 @echo off
-title Push India Fashions to GitHub & Vercel
+title India Fashions - Push to GitHub and Vercel
 color 0B
-cd /d "%~dp0"
+cd /d "c:\Users\Manzoor\.gemini\antigravity-ide\scratch\india-fashions"
 
-echo ==========================================================
-echo        INDIA FASHIONS - PUSH TO GITHUB ^& VERCEL
-echo ==========================================================
+echo ===================================================================
+echo             INDIA FASHIONS - PUSH ALL COMMITS TO GITHUB ^& VERCEL
+echo ===================================================================
 echo.
-echo Target Repo: https://github.com/manzoorsks-source/india-fashions.git
-echo Live Vercel: https://india-fashions-eight.vercel.app
+echo Repo:   https://github.com/manzoorsks-source/india-fashions
+echo Vercel: https://india-fashions-eight.vercel.app
+echo.
+echo [*] Checking unpushed commits...
+git log origin/main..HEAD --oneline
 echo.
 
-:: Check if git-credential-manager exists
 set "GCM=C:\Program Files\Git\mingw64\bin\git-credential-manager.exe"
 if exist "%GCM%" (
-    echo [*] Checking GitHub authorization status...
-    "%GCM%" github list | findstr /i "manzoorsks-source" >nul
-    if %ERRORLEVEL% neq 0 (
-        echo.
-        echo [!] GitHub sign-in required for account 'manzoorsks-source'.
-        echo [*] Opening your browser to authorize GitHub...
-        echo     (Please click the green 'Authorize git-credential-manager' button)
-        echo.
-        "%GCM%" github login --username manzoorsks-source --browser
-    )
+    echo [*] Starting GitHub Browser Authentication...
+    echo     Agar browser me GitHub page khule, toh green "Authorize" button dabayein.
+    "%GCM%" github login --username manzoorsks-source --browser
 )
 
 echo.
-echo [*] Pushing 24 commits to GitHub main branch...
+echo [*] Pushing all commits to GitHub main...
 git push origin main
 
 if %ERRORLEVEL% equ 0 (
     echo.
-    echo ==========================================================
-    echo   [SUCCESS] All code successfully pushed to GitHub!
+    echo ===================================================================
+    echo   [MUBARAK / SUCCESS] All 27 commits successfully pushed to GitHub!
     echo.
-    echo   - GitHub Repo:   https://github.com/manzoorsks-source/india-fashions
-    echo   - Live Website:   https://india-fashions-eight.vercel.app
+    echo   1. GitHub Repo updated:
+    echo      https://github.com/manzoorsks-source/india-fashions
     echo.
-    echo   Vercel will automatically rebuild and deploy your latest site!
-    echo ==========================================================
-) else (
+    echo   2. Vercel automatically new website build shuru kar chuka hai!
+    echo      2 minute me check karein: https://india-fashions-eight.vercel.app
+    echo ===================================================================
     echo.
-    echo ==========================================================
-    echo   [TROUBLESHOOTING] Push did not complete.
-    echo.
-    echo   If browser authorization was denied or did not appear:
-    echo   You can authenticate using a GitHub Personal Access Token (PAT):
-    echo   1. Create token at: https://github.com/settings/tokens
-    echo   2. Run command: git push https://YOUR_TOKEN@github.com/manzoorsks-source/india-fashions.git main
-    echo ==========================================================
+    pause
+    exit /b 0
+)
+
+echo.
+echo ===================================================================
+echo   [OPTION 2] Agar browser se login nahi hua, toh GitHub Token dalein:
+echo.
+echo   1. Is link se token copy karein (Repo permission check hona chahiye):
+echo      https://github.com/settings/tokens/new
+echo.
+echo   2. Niche apna GitHub Personal Access Token (ghp_...) paste karein:
+echo ===================================================================
+echo.
+set /p "GITHUB_PAT=Token Paste karein (ya Enter dabayein band karne ke liye): "
+
+if not "%GITHUB_PAT%"=="" (
+    echo [*] Pushing using Personal Access Token...
+    git push https://manzoorsks-source:%GITHUB_PAT%@github.com/manzoorsks-source/india-fashions.git main
+    if %ERRORLEVEL% equ 0 (
+        echo.
+        echo ===================================================================
+        echo   [SUCCESS] GitHub aur Vercel update ho gaye hain!
+        echo ===================================================================
+        pause
+        exit /b 0
+    )
 )
 
 echo.
